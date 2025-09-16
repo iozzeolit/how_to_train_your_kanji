@@ -82,6 +82,18 @@ function App() {
             // Kiểm tra nếu có kanji (cột A không trống)
             const kanjiText = row[0].text ? String(row[0].text).trim() : "";
             if (kanjiText !== "") {
+              // Xử lý hanviet reading (cột B) - tách bằng dấu phẩy nếu có
+              const hanvietText = row[1].text || "";
+              const hanvietReadings =
+                hanvietText.includes("、") || hanvietText.includes(",")
+                  ? hanvietText
+                      .split(/[、,]/)
+                      .map((reading) => reading.trim())
+                      .filter((reading) => reading !== "")
+                  : hanvietText.trim() !== ""
+                  ? [hanvietText.trim()]
+                  : [];
+
               // Xử lý kun reading (cột C) - tách bằng dấu phẩy nếu có
               const kunText = row[2].text || "";
               const kunReadings =
@@ -108,7 +120,7 @@ function App() {
 
               result.push({
                 kanji: kanjiText,
-                hanviet: row[1].text || "",
+                hanviet: hanvietReadings,
                 kun: kunReadings,
                 on: onReadings,
                 example: [
