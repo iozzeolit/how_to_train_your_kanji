@@ -26,29 +26,76 @@ function App() {
       const reader = new FileReader();
       reader.onload = (e) => {
         const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: "array" });
+        const workbook = XLSX.read(data, { type: "array", cellStyles: true });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Đọc với raw data để lấy phonetic
+        const range = XLSX.utils.decode_range(worksheet["!ref"]);
         const result = [];
-        for (let i = 1; i < rows.length; i++) {
-          const row = rows[i];
+
+        for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+          const row = [];
+          for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cellAddress = XLSX.utils.encode_cell({ c: C, r: R });
+            const cell = worksheet[cellAddress];
+            if (cell) {
+              // Lấy phonetic text nếu có và extract chỉ nội dung hiragana
+              let phoneticText = null;
+              if (cell.r && typeof cell.r === "string") {
+                // Extract nội dung trong <rPh><t>...</t></rPh>
+                const rPhMatch = cell.r.match(
+                  /<rPh[^>]*><t>([^<]+)<\/t><\/rPh>/
+                );
+                if (rPhMatch) {
+                  phoneticText = rPhMatch[1];
+                }
+              }
+              row[C] = {
+                text: cell.v || "",
+                phonetic: phoneticText,
+              };
+            } else {
+              row[C] = { text: "", phonetic: null };
+            }
+          }
+
           if (row.length >= 6) {
             // Kiểm tra nếu có kanji (cột A không trống)
-            if (row[0] && row[0].trim() !== "") {
+            const kanjiText = row[0].text ? String(row[0].text).trim() : "";
+            if (kanjiText !== "") {
               result.push({
-                kanji: row[0],
-                hanviet: row[1],
-                kun: row[2],
-                on: row[3],
-                example: [row[4], row[5]],
+                kanji: kanjiText,
+                hanviet: row[1].text || "",
+                kun: row[2].text || "",
+                on: row[3].text || "",
+                example: [
+                  {
+                    text: row[4].text || "",
+                    phonetic: row[4].phonetic,
+                  },
+                  {
+                    text: row[5].text || "",
+                    phonetic: row[5].phonetic,
+                  },
+                ],
               });
             } else {
               // Nếu không có kanji, thêm example vào kanji trước đó
-              if (result.length > 0 && (row[4] || row[5])) {
+              if (result.length > 0 && (row[4].text || row[5].text)) {
                 const lastKanji = result[result.length - 1];
-                if (row[4]) lastKanji.example.push(row[4]);
-                if (row[5]) lastKanji.example.push(row[5]);
+                if (row[4].text) {
+                  lastKanji.example.push({
+                    text: row[4].text || "",
+                    phonetic: row[4].phonetic,
+                  });
+                }
+                if (row[5].text) {
+                  lastKanji.example.push({
+                    text: row[5].text || "",
+                    phonetic: row[5].phonetic,
+                  });
+                }
               }
             }
           }

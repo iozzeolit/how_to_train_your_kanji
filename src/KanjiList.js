@@ -1,6 +1,25 @@
 import React from "react";
 
 function KanjiList({ kanjiData }) {
+  const renderExample = (example) => {
+    if (!example) return "";
+    if (typeof example === "string") return example;
+    if (typeof example === "object" && example.text) {
+      return (
+        <div>
+          <div>{example.text}</div>
+          {example.phonetic && (
+            <div
+              style={{ fontSize: "12px", color: "#666", fontStyle: "italic" }}
+            >
+              ({example.phonetic})
+            </div>
+          )}
+        </div>
+      );
+    }
+    return "";
+  };
   return (
     <div style={{ padding: "20px" }}>
       <h2>Danh sách các chữ đã đọc</h2>
@@ -32,8 +51,8 @@ function KanjiList({ kanjiData }) {
                   <td>{item.hanviet}</td>
                   <td>{item.kun}</td>
                   <td>{item.on}</td>
-                  <td>{item.example[0] || ""}</td>
-                  <td>{item.example[1] || ""}</td>
+                  <td>{renderExample(item.example[0])}</td>
+                  <td>{renderExample(item.example[1])}</td>
                 </tr>
               );
 
@@ -46,8 +65,8 @@ function KanjiList({ kanjiData }) {
                       <td></td>
                       <td></td>
                       <td></td>
-                      <td>{item.example[i] || ""}</td>
-                      <td>{item.example[i + 1] || ""}</td>
+                      <td>{renderExample(item.example[i])}</td>
+                      <td>{renderExample(item.example[i + 1])}</td>
                     </tr>
                   );
                 }

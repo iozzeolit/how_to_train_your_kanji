@@ -247,7 +247,35 @@ function RandomKanji({ kanjiData }) {
           }}
         >
           <h4>Từ ví dụ:</h4>
-          <p>{currentKanji.example.filter(Boolean).join(", ")}</p>
+          <div>
+            {currentKanji.example.filter(Boolean).map((example, idx) => {
+              if (typeof example === "string") {
+                return (
+                  <div key={idx} style={{ marginBottom: "5px" }}>
+                    {example}
+                  </div>
+                );
+              } else if (typeof example === "object" && example.text) {
+                return (
+                  <div key={idx} style={{ marginBottom: "10px" }}>
+                    <div>{example.text}</div>
+                    {example.phonetic && (
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          color: "#666",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        ({example.phonetic})
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </div>
         </div>
       )}
     </div>
