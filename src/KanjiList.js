@@ -98,7 +98,9 @@ function KanjiList({ kanjiData }) {
                 <tr key={`${idx}-main`}>
                   <td>{item.kanji}</td>
                   <td>
-                    {Array.isArray(item.hanviet) ? item.hanviet.join("、") : item.hanviet}
+                    {Array.isArray(item.hanviet)
+                      ? item.hanviet.join("、")
+                      : item.hanviet}
                   </td>
                   <td>
                     {Array.isArray(item.kun) ? item.kun.join("、") : item.kun}

@@ -112,24 +112,34 @@ function RandomKanji({ kanjiData }) {
     // Hàm kiểm tra đáp án Hán Việt - chỉ cần 1 từ trong input trùng với bất kỳ từ nào trong mảng
     const checkHanvietAnswer = (userAnswer, correctReadings) => {
       if (!correctReadings || correctReadings.length === 0) return false;
-      
-      const userWords = userAnswer.trim().toLowerCase().split(/[\s,、]+/).filter(word => word !== "");
-      
+
+      const userWords = userAnswer
+        .trim()
+        .toLowerCase()
+        .split(/[\s,、]+/)
+        .filter((word) => word !== "");
+
       if (Array.isArray(correctReadings)) {
         // Tách các từ trong correctReadings thành mảng phẳng
-        const allCorrectWords = correctReadings.flatMap(reading => 
-          reading.toLowerCase().split(/[\s,、]+/).filter(word => word !== "")
+        const allCorrectWords = correctReadings.flatMap((reading) =>
+          reading
+            .toLowerCase()
+            .split(/[\s,、]+/)
+            .filter((word) => word !== "")
         );
-        
+
         // Kiểm tra xem có ít nhất 1 từ trong userWords trùng với allCorrectWords không
-        return userWords.some(userWord => 
-          allCorrectWords.some(correctWord => userWord === correctWord)
+        return userWords.some((userWord) =>
+          allCorrectWords.some((correctWord) => userWord === correctWord)
         );
       } else {
         // Backward compatibility với string
-        const correctWords = correctReadings.toLowerCase().split(/[\s,、]+/).filter(word => word !== "");
-        return userWords.some(userWord => 
-          correctWords.some(correctWord => userWord === correctWord)
+        const correctWords = correctReadings
+          .toLowerCase()
+          .split(/[\s,、]+/)
+          .filter((word) => word !== "");
+        return userWords.some((userWord) =>
+          correctWords.some((correctWord) => userWord === correctWord)
         );
       }
     };
@@ -222,9 +232,11 @@ function RandomKanji({ kanjiData }) {
             >
               {isCorrect.hanviet
                 ? "✓ Đúng!"
-                : `✗ Sai! Đáp án: ${Array.isArray(currentKanji.hanviet) 
-                    ? currentKanji.hanviet.join("、") 
-                    : currentKanji.hanviet}`}
+                : `✗ Sai! Đáp án: ${
+                    Array.isArray(currentKanji.hanviet)
+                      ? currentKanji.hanviet.join("、")
+                      : currentKanji.hanviet
+                  }`}
             </div>
           )}
         </div>
