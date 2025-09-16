@@ -265,263 +265,351 @@ function DailyLearning({ kanjiData }) {
   const completedToday = todayProgress.length;
 
   return (
-    <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "20px",
-        }}
-      >
-        <h2>Học chữ theo ngày</h2>
-        <button
-          onClick={resetPlan}
-          style={{
-            padding: "8px 16px",
-            fontSize: "14px",
-            backgroundColor: "#dc3545",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          Reset kế hoạch
-        </button>
-      </div>
-
-      <div
-        style={{
-          backgroundColor: "#f8f9fa",
-          padding: "15px",
-          borderRadius: "5px",
-          marginBottom: "20px",
-        }}
-      >
-        <h3>
-          Ngày {currentDay} / {learningPlan.length}
-        </h3>
-        <p>
-          Tiến độ hôm nay: {completedToday} / {todayKanji.length} từ
-        </p>
+    <div
+      style={{
+        padding: "20px",
+        display: "flex",
+        gap: "20px",
+        minHeight: "100vh",
+        justifyContent: "space-evenly",
+      }}
+    >
+      {/* Main content area */}
+      <div style={{ flex: "1", paddingRight: "20px" }}>
         <div
           style={{
-            width: "100%",
-            backgroundColor: "#e9ecef",
-            borderRadius: "10px",
-            height: "20px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px",
           }}
         >
-          <div
+          <h2>Học chữ theo ngày</h2>
+          <button
+            onClick={resetPlan}
             style={{
-              width: `${(completedToday / todayKanji.length) * 100}%`,
-              backgroundColor: "#28a745",
-              borderRadius: "10px",
-              height: "100%",
-            }}
-          ></div>
-        </div>
-      </div>
-
-      {currentKanji && (
-        <>
-          <div
-            style={{
-              fontSize: "72px",
-              textAlign: "center",
-              margin: "20px 0",
-              border: "2px solid #ccc",
-              padding: "20px",
-              backgroundColor: "#f9f9f9",
-              minHeight: "120px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              padding: "8px 16px",
+              fontSize: "14px",
+              backgroundColor: "#dc3545",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
             }}
           >
-            {currentKanji.kanji}
-          </div>
+            Reset kế hoạch
+          </button>
+        </div>
 
-          <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", marginBottom: "5px" }}>
-                Hán Việt:
-              </label>
-              <input
-                type="text"
-                value={userAnswers.hanviet}
-                onChange={(e) => handleInputChange("hanviet", e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  fontSize: "16px",
-                  backgroundColor: showResult
-                    ? isCorrect.hanviet
-                      ? "#d4edda"
-                      : "#f8d7da"
-                    : "white",
-                }}
-                disabled={showResult}
-              />
-              {showResult && (
-                <div
-                  style={{
-                    marginTop: "5px",
-                    color: isCorrect.hanviet ? "green" : "red",
-                  }}
-                >
-                  {isCorrect.hanviet
-                    ? "✓ Đúng!"
-                    : `✗ Sai! Đáp án: ${currentKanji.hanviet}`}
-                </div>
-              )}
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", marginBottom: "5px" }}>
-                Âm Kun:
-              </label>
-              <input
-                type="text"
-                value={userAnswers.kun}
-                onChange={(e) => handleInputChange("kun", e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  fontSize: "16px",
-                  backgroundColor: showResult
-                    ? isCorrect.kun
-                      ? "#d4edda"
-                      : "#f8d7da"
-                    : "white",
-                }}
-                disabled={showResult}
-              />
-              {showResult && (
-                <div
-                  style={{
-                    marginTop: "5px",
-                    color: isCorrect.kun ? "green" : "red",
-                  }}
-                >
-                  {isCorrect.kun
-                    ? "✓ Đúng!"
-                    : `✗ Sai! Đáp án: ${currentKanji.kun}`}
-                </div>
-              )}
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", marginBottom: "5px" }}>
-                Âm On:
-              </label>
-              <input
-                type="text"
-                value={userAnswers.on}
-                onChange={(e) => handleInputChange("on", e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  fontSize: "16px",
-                  backgroundColor: showResult
-                    ? isCorrect.on
-                      ? "#d4edda"
-                      : "#f8d7da"
-                    : "white",
-                }}
-                disabled={showResult}
-              />
-              {showResult && (
-                <div
-                  style={{
-                    marginTop: "5px",
-                    color: isCorrect.on ? "green" : "red",
-                  }}
-                >
-                  {isCorrect.on
-                    ? "✓ Đúng!"
-                    : `✗ Sai! Đáp án: ${currentKanji.on}`}
-                </div>
-              )}
-            </div>
-
-            <div style={{ textAlign: "center", marginTop: "20px" }}>
-              <button
-                type="submit"
-                style={{
-                  padding: "10px 20px",
-                  fontSize: "16px",
-                  backgroundColor: "#007bff",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                  marginRight: "10px",
-                }}
-                disabled={showResult}
-              >
-                Kiểm tra
-              </button>
-              <button
-                type="button"
-                onClick={nextKanji}
-                style={{
-                  padding: "10px 20px",
-                  fontSize: "16px",
-                  backgroundColor: "#28a745",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                }}
-              >
-                Từ tiếp theo
-              </button>
-            </div>
-          </form>
-
-          {showResult && currentKanji.example && (
+        <div
+          style={{
+            backgroundColor: "#f8f9fa",
+            padding: "15px",
+            borderRadius: "5px",
+            marginBottom: "20px",
+          }}
+        >
+          <h3>
+            Ngày {currentDay} / {learningPlan.length}
+          </h3>
+          <p>
+            Tiến độ hôm nay: {completedToday} / {todayKanji.length} từ
+          </p>
+          <div
+            style={{
+              width: "100%",
+              backgroundColor: "#e9ecef",
+              borderRadius: "10px",
+              height: "20px",
+            }}
+          >
             <div
               style={{
-                marginTop: "20px",
-                padding: "15px",
-                backgroundColor: "#e9ecef",
-                borderRadius: "5px",
+                width: `${(completedToday / todayKanji.length) * 100}%`,
+                backgroundColor: "#28a745",
+                borderRadius: "10px",
+                height: "100%",
+              }}
+            ></div>
+          </div>
+        </div>
+
+        {currentKanji && (
+          <>
+            <div
+              style={{
+                fontSize: "72px",
+                textAlign: "center",
+                margin: "20px 0",
+                border: "2px solid #ccc",
+                padding: "20px",
+                backgroundColor: "#f9f9f9",
+                minHeight: "120px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              <h4>Từ ví dụ:</h4>
-              <div>
-                {currentKanji.example && currentKanji.example.length > 0 ? (
-                  currentKanji.example.filter(Boolean).map((example, idx) => {
-                    if (typeof example === "string") {
-                      return (
-                        <div key={idx} style={{ marginBottom: "5px" }}>
-                          {example}
-                        </div>
-                      );
-                    } else if (typeof example === "object" && example.text) {
-                      return (
-                        <div
-                          key={idx}
-                          style={{ marginBottom: "10px", fontSize: "18px" }}
-                        >
-                          {example.phonetic
-                            ? createRubyText(example.text, example.phonetic)
-                            : example.text}
-                        </div>
-                      );
-                    }
-                    return null;
-                  })
-                ) : (
-                  <p>Không có từ ví dụ nào.</p>
+              {currentKanji.kanji}
+            </div>
+
+            <form onSubmit={handleSubmit}>
+              <div style={{ marginBottom: "15px" }}>
+                <label style={{ display: "block", marginBottom: "5px" }}>
+                  Hán Việt:
+                </label>
+                <input
+                  type="text"
+                  value={userAnswers.hanviet}
+                  onChange={(e) => handleInputChange("hanviet", e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    fontSize: "16px",
+                    backgroundColor: showResult
+                      ? isCorrect.hanviet
+                        ? "#d4edda"
+                        : "#f8d7da"
+                      : "white",
+                  }}
+                  disabled={showResult}
+                />
+                {showResult && (
+                  <div
+                    style={{
+                      marginTop: "5px",
+                      color: isCorrect.hanviet ? "green" : "red",
+                    }}
+                  >
+                    {isCorrect.hanviet
+                      ? "✓ Đúng!"
+                      : `✗ Sai! Đáp án: ${currentKanji.hanviet}`}
+                  </div>
                 )}
               </div>
+
+              <div style={{ marginBottom: "15px" }}>
+                <label style={{ display: "block", marginBottom: "5px" }}>
+                  Âm Kun:
+                </label>
+                <input
+                  type="text"
+                  value={userAnswers.kun}
+                  onChange={(e) => handleInputChange("kun", e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    fontSize: "16px",
+                    backgroundColor: showResult
+                      ? isCorrect.kun
+                        ? "#d4edda"
+                        : "#f8d7da"
+                      : "white",
+                  }}
+                  disabled={showResult}
+                />
+                {showResult && (
+                  <div
+                    style={{
+                      marginTop: "5px",
+                      color: isCorrect.kun ? "green" : "red",
+                    }}
+                  >
+                    {isCorrect.kun
+                      ? "✓ Đúng!"
+                      : `✗ Sai! Đáp án: ${currentKanji.kun}`}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ marginBottom: "15px" }}>
+                <label style={{ display: "block", marginBottom: "5px" }}>
+                  Âm On:
+                </label>
+                <input
+                  type="text"
+                  value={userAnswers.on}
+                  onChange={(e) => handleInputChange("on", e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    fontSize: "16px",
+                    backgroundColor: showResult
+                      ? isCorrect.on
+                        ? "#d4edda"
+                        : "#f8d7da"
+                      : "white",
+                  }}
+                  disabled={showResult}
+                />
+                {showResult && (
+                  <div
+                    style={{
+                      marginTop: "5px",
+                      color: isCorrect.on ? "green" : "red",
+                    }}
+                  >
+                    {isCorrect.on
+                      ? "✓ Đúng!"
+                      : `✗ Sai! Đáp án: ${currentKanji.on}`}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ textAlign: "center", marginTop: "20px" }}>
+                <button
+                  type="submit"
+                  style={{
+                    padding: "10px 20px",
+                    fontSize: "16px",
+                    backgroundColor: "#007bff",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                    marginRight: "10px",
+                  }}
+                  disabled={showResult}
+                >
+                  Kiểm tra
+                </button>
+                <button
+                  type="button"
+                  onClick={nextKanji}
+                  style={{
+                    padding: "10px 20px",
+                    fontSize: "16px",
+                    backgroundColor: "#28a745",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Từ tiếp theo
+                </button>
+              </div>
+            </form>
+
+            {showResult && currentKanji.example && (
+              <div
+                style={{
+                  marginTop: "20px",
+                  padding: "15px",
+                  backgroundColor: "#e9ecef",
+                  borderRadius: "5px",
+                }}
+              >
+                <h4>Từ ví dụ:</h4>
+                <div>
+                  {currentKanji.example && currentKanji.example.length > 0 ? (
+                    currentKanji.example.filter(Boolean).map((example, idx) => {
+                      if (typeof example === "string") {
+                        return (
+                          <div key={idx} style={{ marginBottom: "5px" }}>
+                            {example}
+                          </div>
+                        );
+                      } else if (typeof example === "object" && example.text) {
+                        return (
+                          <div
+                            key={idx}
+                            style={{ marginBottom: "10px", fontSize: "18px" }}
+                          >
+                            {example.phonetic
+                              ? createRubyText(example.text, example.phonetic)
+                              : example.text}
+                          </div>
+                        );
+                      }
+                      return null;
+                    })
+                  ) : (
+                    <p>Không có từ ví dụ nào.</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Right Sidebar - Progress Grid */}
+      <div
+        style={{
+          flexShrink: 0,
+          position: "sticky",
+          top: "20px",
+          height: "fit-content",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "#fff",
+            padding: "15px",
+            borderRadius: "5px",
+            border: "1px solid #dee2e6",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          }}
+        >
+          <h4 style={{ marginBottom: "15px", marginTop: "0" }}>
+            Tiến độ học tập:
+          </h4>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(6, 1fr)",
+              gap: "8px",
+            }}
+          >
+            {learningPlan.map((day, index) => {
+              const dayNumber = index + 1;
+              const dayProgress = dailyProgress[`day${dayNumber}`] || [];
+              const isCompleted = dayProgress.length === day.kanji.length;
+              const isCurrent = dayNumber === currentDay;
+
+              return (
+                <div
+                  key={dayNumber}
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    backgroundColor: isCompleted
+                      ? "#28a745"
+                      : isCurrent
+                      ? "#ffc107"
+                      : "#E7E4E4",
+                    color: "black",
+                    border: isCurrent ? "3px solid #007bff" : "none",
+                    transition: "all 0.2s ease",
+                  }}
+                  title={`Ngày ${dayNumber}: ${dayProgress.length}/${day.kanji.length} từ`}
+                >
+                  {dayNumber}
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ marginTop: "15px", fontSize: "11px", color: "#666" }}>
+            <div style={{ marginBottom: "3px" }}>
+              <span style={{ color: "#28a745" }}>■</span> Hoàn thành
             </div>
-          )}
-        </>
-      )}
+            <div style={{ marginBottom: "3px" }}>
+              <span style={{ color: "#ffc107" }}>■</span> Đang học
+            </div>
+            <div>
+              <span style={{ color: "#E7E4E4" }}>■</span> Chưa học
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
