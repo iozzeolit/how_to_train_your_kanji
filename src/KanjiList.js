@@ -1,6 +1,55 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 
 function KanjiList({ kanjiData }) {
+  const [sortBy, setSortBy] = useState(null); // 'kun', 'on', or null
+  const [sortOrder, setSortOrder] = useState("asc"); // 'asc' or 'desc'
+
+  // Hàm xử lý sắp xếp
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      // Nếu đang sắp xếp theo cột hiện tại, đổi thứ tự
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // Nếu sắp xếp theo cột mới, mặc định là tăng dần
+      setSortBy(column);
+      setSortOrder("asc");
+    }
+  };
+
+  // Hàm lấy giá trị để sắp xếp
+  const getSortValue = (item, column) => {
+    const value = item[column];
+    if (!value) return "";
+
+    if (Array.isArray(value)) {
+      // Nếu là mảng, lấy phần tử đầu tiên để sắp xếp
+      return value.length > 0 ? value[0].toLowerCase() : "";
+    }
+
+    return value.toLowerCase();
+  };
+
+  // Dữ liệu đã được sắp xếp
+  const sortedKanjiData = useMemo(() => {
+    if (!sortBy) return kanjiData;
+
+    const sorted = [...kanjiData].sort((a, b) => {
+      const valueA = getSortValue(a, sortBy);
+      const valueB = getSortValue(b, sortBy);
+
+      if (valueA < valueB) return sortOrder === "asc" ? -1 : 1;
+      if (valueA > valueB) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
+  }, [kanjiData, sortBy, sortOrder]);
+
+  // Hàm tạo biểu tượng sắp xếp
+  const getSortIcon = (column) => {
+    if (sortBy !== column) return " ↕️";
+    return sortOrder === "asc" ? " ↑" : " ↓";
+  };
   // Hàm kiểm tra xem ký tự có phải kanji không
   const isKanji = (char) => {
     const code = char.charCodeAt(0);
@@ -72,6 +121,75 @@ function KanjiList({ kanjiData }) {
   return (
     <div style={{ padding: "20px" }}>
       <h2>Danh sách các chữ đã đọc</h2>
+
+      {/* Khu vực điều khiển sắp xếp */}
+      {kanjiData.length > 0 && (
+        <div
+          style={{
+            marginBottom: "15px",
+            padding: "10px",
+            backgroundColor: "#f5f5f5",
+            borderRadius: "5px",
+            display: "flex",
+            alignItems: "center",
+            gap: "15px",
+          }}
+        >
+          <span style={{ fontWeight: "bold" }}>Sắp xếp:</span>
+          <button
+            onClick={() => handleSort("kun")}
+            style={{
+              padding: "5px 10px",
+              backgroundColor: sortBy === "kun" ? "#2196F3" : "#e0e0e0",
+              color: sortBy === "kun" ? "white" : "black",
+              border: "none",
+              borderRadius: "3px",
+              cursor: "pointer",
+            }}
+          >
+            Âm Kun {sortBy === "kun" ? getSortIcon("kun") : ""}
+          </button>
+          <button
+            onClick={() => handleSort("on")}
+            style={{
+              padding: "5px 10px",
+              backgroundColor: sortBy === "on" ? "#2196F3" : "#e0e0e0",
+              color: sortBy === "on" ? "white" : "black",
+              border: "none",
+              borderRadius: "3px",
+              cursor: "pointer",
+            }}
+          >
+            Âm On {sortBy === "on" ? getSortIcon("on") : ""}
+          </button>
+          {sortBy && (
+            <button
+              onClick={() => {
+                setSortBy(null);
+                setSortOrder("asc");
+              }}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: "#f44336",
+                color: "white",
+                border: "none",
+                borderRadius: "3px",
+                cursor: "pointer",
+              }}
+            >
+              Xóa sắp xếp
+            </button>
+          )}
+          {sortBy && (
+            <span style={{ fontSize: "14px", color: "#666" }}>
+              Đang sắp xếp theo{" "}
+              <strong>{sortBy === "kun" ? "Âm Kun" : "Âm On"}</strong>(
+              {sortOrder === "asc" ? "A-Z" : "Z-A"})
+            </span>
+          )}
+        </div>
+      )}
+
       {kanjiData.length === 0 ? (
         <p>Chưa có dữ liệu nào.</p>
       ) : (
@@ -84,13 +202,33 @@ function KanjiList({ kanjiData }) {
             <tr>
               <th>Kanji</th>
               <th>Hán Việt</th>
-              <th>Âm Kun</th>
-              <th>Âm On</th>
+              <th
+                style={{
+                  cursor: "pointer",
+                  backgroundColor: sortBy === "kun" ? "#e3f2fd" : "transparent",
+                  userSelect: "none",
+                }}
+                onClick={() => handleSort("kun")}
+                title="Nhấp để sắp xếp theo Âm Kun"
+              >
+                Âm Kun{getSortIcon("kun")}
+              </th>
+              <th
+                style={{
+                  cursor: "pointer",
+                  backgroundColor: sortBy === "on" ? "#e3f2fd" : "transparent",
+                  userSelect: "none",
+                }}
+                onClick={() => handleSort("on")}
+                title="Nhấp để sắp xếp theo Âm On"
+              >
+                Âm On{getSortIcon("on")}
+              </th>
               <th colSpan={2}>Từ ví dụ</th>{" "}
             </tr>
           </thead>
           <tbody>
-            {kanjiData.map((item, idx) => {
+            {sortedKanjiData.map((item, idx) => {
               const rows = [];
 
               // Hàng đầu tiên với kanji và 2 ví dụ đầu
