@@ -1,7 +1,7 @@
 import logo from "./logo.svg";
 import "./App.css";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./Navbar";
@@ -10,6 +10,14 @@ import KanjiList from "./KanjiList";
 function App() {
   const fileInputRef = useRef();
   const [kanjiData, setKanjiData] = useState([]);
+
+  // Lấy dữ liệu từ localStorage khi khởi động app
+  useEffect(() => {
+    const stored = localStorage.getItem("kanjiData");
+    if (stored) {
+      setKanjiData(JSON.parse(stored));
+    }
+  }, []);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -30,12 +38,12 @@ function App() {
               hanviet: row[1],
               kun: row[2],
               on: row[3],
-              example1: row[4],
-              example2: row[5],
+              example: [row[4], row[5]],
             });
           }
         }
         setKanjiData(result);
+        localStorage.setItem("kanjiData", JSON.stringify(result));
         alert(`Đã đọc ${result.length} dòng dữ liệu từ file Excel!`);
       };
       reader.readAsArrayBuffer(file);

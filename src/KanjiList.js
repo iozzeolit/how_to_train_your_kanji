@@ -18,8 +18,7 @@ function KanjiList({ kanjiData }) {
               <th>Hán Việt</th>
               <th>Âm Kun</th>
               <th>Âm On</th>
-              <th>Ví dụ 1</th>
-              <th>Ví dụ 2</th>
+              <th colSpan={2}>Từ ví dụ</th>{" "}
             </tr>
           </thead>
           <tbody>
@@ -29,8 +28,8 @@ function KanjiList({ kanjiData }) {
                 <td>{item.hanviet}</td>
                 <td>{item.kun}</td>
                 <td>{item.on}</td>
-                <td>{item.example1}</td>
-                <td>{item.example2}</td>
+                <td>{item.example[0]}</td>
+                <td>{item.example[1]}</td>
               </tr>
             ))}
           </tbody>
