@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./Navbar";
 import KanjiList from "./KanjiList";
 import RandomKanji from "./RandomKanji";
+import DailyLearning from "./DailyLearning";
 
 function App() {
   const fileInputRef = useRef();
@@ -157,6 +158,10 @@ function App() {
         <Route
           path="/random-kanji"
           element={<RandomKanji kanjiData={kanjiData} />}
+        />
+        <Route
+          path="/daily-learning"
+          element={<DailyLearning kanjiData={kanjiData} />}
         />
       </Routes>
     </Router>

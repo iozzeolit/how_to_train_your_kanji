@@ -18,9 +18,15 @@ function Navbar() {
       </Link>
       <Link
         to="/random-kanji"
-        style={{ color: "white", textDecoration: "none" }}
+        style={{ color: "white", marginRight: "20px", textDecoration: "none" }}
       >
         Học chữ ngẫu nhiên
+      </Link>
+      <Link
+        to="/daily-learning"
+        style={{ color: "white", textDecoration: "none" }}
+      >
+        Học chữ theo ngày
       </Link>
     </nav>
   );
