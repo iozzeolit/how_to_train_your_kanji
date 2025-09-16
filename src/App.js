@@ -42,13 +42,30 @@ function App() {
             if (cell) {
               // Lấy phonetic text nếu có và extract chỉ nội dung hiragana
               let phoneticText = null;
-              if (cell.r && typeof cell.r === "string") {
-                // Extract nội dung trong <rPh><t>...</t></rPh>
-                const rPhMatch = cell.r.match(
-                  /<rPh[^>]*><t>([^<]+)<\/t><\/rPh>/
-                );
-                if (rPhMatch) {
-                  phoneticText = rPhMatch[1];
+              if (cell.r) {
+                if (typeof cell.r === "string") {
+                  // Extract nội dung trong <rPh><t>...</t></rPh> - hỗ trợ xml:space="preserve"
+                  const rPhMatch = cell.r.match(
+                    /<rPh[^>]*><t[^>]*>([^<]+)<\/t><\/rPh>/
+                  );
+                  if (rPhMatch) {
+                    // Trim khoảng trắng thừa nhưng giữ khoảng trắng giữa các ký tự
+                    phoneticText = rPhMatch[1].trim().replace(/\s+/g, "");
+                  }
+                } else if (Array.isArray(cell.r)) {
+                  // Nếu cell.r là array, tìm trong các phần tử
+                  for (let i = 0; i < cell.r.length; i++) {
+                    const element = cell.r[i];
+                    if (element && element.rPh && element.rPh.t) {
+                      phoneticText = element.rPh.t;
+                      break;
+                    }
+                  }
+                } else if (typeof cell.r === "object") {
+                  // Nếu cell.r là object, kiểm tra cấu trúc
+                  if (cell.r.rPh && cell.r.rPh.t) {
+                    phoneticText = cell.r.rPh.t;
+                  }
                 }
               }
               row[C] = {
