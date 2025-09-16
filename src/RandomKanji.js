@@ -93,15 +93,26 @@ function RandomKanji({ kanjiData }) {
     e.preventDefault();
     if (!currentKanji) return;
 
+    // Hàm kiểm tra đáp án với mảng readings
+    const checkReadingAnswer = (userAnswer, correctReadings) => {
+      if (!correctReadings || correctReadings.length === 0) return false;
+      if (Array.isArray(correctReadings)) {
+        // Nếu correctReadings là mảng, kiểm tra xem userAnswer có match với bất kỳ phần tử nào không
+        return correctReadings.some(reading => 
+          userAnswer.trim().toLowerCase() === reading.toLowerCase()
+        );
+      } else {
+        // Nếu correctReadings là string (backward compatibility)
+        return userAnswer.trim().toLowerCase() === correctReadings.toLowerCase();
+      }
+    };
+
     const results = {
       hanviet:
         userAnswers.hanviet.trim().toLowerCase() ===
         currentKanji.hanviet?.toLowerCase(),
-      kun:
-        userAnswers.kun.trim().toLowerCase() ===
-        currentKanji.kun?.toLowerCase(),
-      on:
-        userAnswers.on.trim().toLowerCase() === currentKanji.on?.toLowerCase(),
+      kun: checkReadingAnswer(userAnswers.kun, currentKanji.kun),
+      on: checkReadingAnswer(userAnswers.on, currentKanji.on),
     };
 
     setIsCorrect(results);
@@ -218,7 +229,9 @@ function RandomKanji({ kanjiData }) {
                 color: isCorrect.kun ? "green" : "red",
               }}
             >
-              {isCorrect.kun ? "✓ Đúng!" : `✗ Sai! Đáp án: ${currentKanji.kun}`}
+              {isCorrect.kun ? "✓ Đúng!" : `✗ Sai! Đáp án: ${Array.isArray(currentKanji.kun) 
+                  ? currentKanji.kun.join("、") 
+                  : currentKanji.kun}`}
             </div>
           )}
         </div>
@@ -250,7 +263,9 @@ function RandomKanji({ kanjiData }) {
                 color: isCorrect.on ? "green" : "red",
               }}
             >
-              {isCorrect.on ? "✓ Đúng!" : `✗ Sai! Đáp án: ${currentKanji.on}`}
+              {isCorrect.on ? "✓ Đúng!" : `✗ Sai! Đáp án: ${Array.isArray(currentKanji.on) 
+                  ? currentKanji.on.join("、") 
+                  : currentKanji.on}`}
             </div>
           )}
         </div>

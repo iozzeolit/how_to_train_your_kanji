@@ -82,11 +82,23 @@ function App() {
             // Kiểm tra nếu có kanji (cột A không trống)
             const kanjiText = row[0].text ? String(row[0].text).trim() : "";
             if (kanjiText !== "") {
+              // Xử lý kun reading (cột C) - tách bằng dấu phẩy nếu có
+              const kunText = row[2].text || "";
+              const kunReadings = kunText.includes("、") || kunText.includes(",") 
+                ? kunText.split(/[、,]/).map(reading => reading.trim()).filter(reading => reading !== "")
+                : kunText.trim() !== "" ? [kunText.trim()] : [];
+
+              // Xử lý on reading (cột D) - tách bằng dấu phẩy nếu có  
+              const onText = row[3].text || "";
+              const onReadings = onText.includes("、") || onText.includes(",")
+                ? onText.split(/[、,]/).map(reading => reading.trim()).filter(reading => reading !== "")
+                : onText.trim() !== "" ? [onText.trim()] : [];
+
               result.push({
                 kanji: kanjiText,
                 hanviet: row[1].text || "",
-                kun: row[2].text || "",
-                on: row[3].text || "",
+                kun: kunReadings,
+                on: onReadings,
                 example: [
                   {
                     text: row[4].text || "",
