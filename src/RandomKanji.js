@@ -98,12 +98,14 @@ function RandomKanji({ kanjiData }) {
       if (!correctReadings || correctReadings.length === 0) return false;
       if (Array.isArray(correctReadings)) {
         // Nếu correctReadings là mảng, kiểm tra xem userAnswer có match với bất kỳ phần tử nào không
-        return correctReadings.some(reading => 
-          userAnswer.trim().toLowerCase() === reading.toLowerCase()
+        return correctReadings.some(
+          (reading) => userAnswer.trim().toLowerCase() === reading.toLowerCase()
         );
       } else {
         // Nếu correctReadings là string (backward compatibility)
-        return userAnswer.trim().toLowerCase() === correctReadings.toLowerCase();
+        return (
+          userAnswer.trim().toLowerCase() === correctReadings.toLowerCase()
+        );
       }
     };
 
@@ -229,9 +231,13 @@ function RandomKanji({ kanjiData }) {
                 color: isCorrect.kun ? "green" : "red",
               }}
             >
-              {isCorrect.kun ? "✓ Đúng!" : `✗ Sai! Đáp án: ${Array.isArray(currentKanji.kun) 
-                  ? currentKanji.kun.join("、") 
-                  : currentKanji.kun}`}
+              {isCorrect.kun
+                ? "✓ Đúng!"
+                : `✗ Sai! Đáp án: ${
+                    Array.isArray(currentKanji.kun)
+                      ? currentKanji.kun.join("、")
+                      : currentKanji.kun
+                  }`}
             </div>
           )}
         </div>
@@ -263,9 +269,13 @@ function RandomKanji({ kanjiData }) {
                 color: isCorrect.on ? "green" : "red",
               }}
             >
-              {isCorrect.on ? "✓ Đúng!" : `✗ Sai! Đáp án: ${Array.isArray(currentKanji.on) 
-                  ? currentKanji.on.join("、") 
-                  : currentKanji.on}`}
+              {isCorrect.on
+                ? "✓ Đúng!"
+                : `✗ Sai! Đáp án: ${
+                    Array.isArray(currentKanji.on)
+                      ? currentKanji.on.join("、")
+                      : currentKanji.on
+                  }`}
             </div>
           )}
         </div>

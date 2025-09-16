@@ -84,15 +84,27 @@ function App() {
             if (kanjiText !== "") {
               // Xử lý kun reading (cột C) - tách bằng dấu phẩy nếu có
               const kunText = row[2].text || "";
-              const kunReadings = kunText.includes("、") || kunText.includes(",") 
-                ? kunText.split(/[、,]/).map(reading => reading.trim()).filter(reading => reading !== "")
-                : kunText.trim() !== "" ? [kunText.trim()] : [];
+              const kunReadings =
+                kunText.includes("、") || kunText.includes(",")
+                  ? kunText
+                      .split(/[、,]/)
+                      .map((reading) => reading.trim())
+                      .filter((reading) => reading !== "")
+                  : kunText.trim() !== ""
+                  ? [kunText.trim()]
+                  : [];
 
-              // Xử lý on reading (cột D) - tách bằng dấu phẩy nếu có  
+              // Xử lý on reading (cột D) - tách bằng dấu phẩy nếu có
               const onText = row[3].text || "";
-              const onReadings = onText.includes("、") || onText.includes(",")
-                ? onText.split(/[、,]/).map(reading => reading.trim()).filter(reading => reading !== "")
-                : onText.trim() !== "" ? [onText.trim()] : [];
+              const onReadings =
+                onText.includes("、") || onText.includes(",")
+                  ? onText
+                      .split(/[、,]/)
+                      .map((reading) => reading.trim())
+                      .filter((reading) => reading !== "")
+                  : onText.trim() !== ""
+                  ? [onText.trim()]
+                  : [];
 
               result.push({
                 kanji: kanjiText,
