@@ -89,6 +89,30 @@ function RandomKanji({ kanjiData }) {
     }));
   };
 
+  // Hàm kiểm tra xem reading có tồn tại không
+  const hasReading = (reading) => {
+    if (!reading) return false;
+    if (Array.isArray(reading)) {
+      return reading.length > 0 && reading.some((r) => r.trim() !== "");
+    }
+    return reading.trim() !== "";
+  };
+
+  // Hàm tạo label với thông tin số lượng âm
+  const createReadingLabel = (baseLabel, reading) => {
+    if (!hasReading(reading)) return baseLabel;
+
+    if (Array.isArray(reading)) {
+      const validReadings = reading.filter((r) => r.trim() !== "");
+      if (validReadings.length > 1) {
+        return `${baseLabel} (từ này có ${validReadings.length} âm ${baseLabel
+          .toLowerCase()
+          .replace("âm ", "")})`;
+      }
+    }
+    return baseLabel;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!currentKanji) return;
@@ -146,8 +170,12 @@ function RandomKanji({ kanjiData }) {
 
     const results = {
       hanviet: checkHanvietAnswer(userAnswers.hanviet, currentKanji.hanviet),
-      kun: checkReadingAnswer(userAnswers.kun, currentKanji.kun),
-      on: checkReadingAnswer(userAnswers.on, currentKanji.on),
+      kun: hasReading(currentKanji.kun)
+        ? checkReadingAnswer(userAnswers.kun, currentKanji.kun)
+        : true,
+      on: hasReading(currentKanji.on)
+        ? checkReadingAnswer(userAnswers.on, currentKanji.on)
+        : true,
     };
 
     setIsCorrect(results);
@@ -241,81 +269,85 @@ function RandomKanji({ kanjiData }) {
           )}
         </div>
 
-        <div style={{ marginBottom: "15px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>
-            Âm Kun:
-          </label>
-          <input
-            type="text"
-            value={userAnswers.kun}
-            onChange={(e) => handleInputChange("kun", e.target.value)}
-            style={{
-              width: "100%",
-              padding: "8px",
-              fontSize: "16px",
-              backgroundColor: showResult
-                ? isCorrect.kun
-                  ? "#d4edda"
-                  : "#f8d7da"
-                : "white",
-            }}
-            disabled={showResult}
-          />
-          {showResult && (
-            <div
+        {hasReading(currentKanji?.kun) && (
+          <div style={{ marginBottom: "15px" }}>
+            <label style={{ display: "block", marginBottom: "5px" }}>
+              {createReadingLabel("Âm Kun", currentKanji?.kun)}:
+            </label>
+            <input
+              type="text"
+              value={userAnswers.kun}
+              onChange={(e) => handleInputChange("kun", e.target.value)}
               style={{
-                marginTop: "5px",
-                color: isCorrect.kun ? "green" : "red",
+                width: "100%",
+                padding: "8px",
+                fontSize: "16px",
+                backgroundColor: showResult
+                  ? isCorrect.kun
+                    ? "#d4edda"
+                    : "#f8d7da"
+                  : "white",
               }}
-            >
-              {isCorrect.kun
-                ? "✓ Đúng!"
-                : `✗ Sai! Đáp án: ${
-                    Array.isArray(currentKanji.kun)
-                      ? currentKanji.kun.join("、")
-                      : currentKanji.kun
-                  }`}
-            </div>
-          )}
-        </div>
+              disabled={showResult}
+            />
+            {showResult && (
+              <div
+                style={{
+                  marginTop: "5px",
+                  color: isCorrect.kun ? "green" : "red",
+                }}
+              >
+                {isCorrect.kun
+                  ? "✓ Đúng!"
+                  : `✗ Sai! Đáp án: ${
+                      Array.isArray(currentKanji.kun)
+                        ? currentKanji.kun.join("、")
+                        : currentKanji.kun
+                    }`}
+              </div>
+            )}
+          </div>
+        )}
 
-        <div style={{ marginBottom: "15px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>
-            Âm On:
-          </label>
-          <input
-            type="text"
-            value={userAnswers.on}
-            onChange={(e) => handleInputChange("on", e.target.value)}
-            style={{
-              width: "100%",
-              padding: "8px",
-              fontSize: "16px",
-              backgroundColor: showResult
-                ? isCorrect.on
-                  ? "#d4edda"
-                  : "#f8d7da"
-                : "white",
-            }}
-            disabled={showResult}
-          />
-          {showResult && (
-            <div
+        {hasReading(currentKanji?.on) && (
+          <div style={{ marginBottom: "15px" }}>
+            <label style={{ display: "block", marginBottom: "5px" }}>
+              {createReadingLabel("Âm On", currentKanji?.on)}:
+            </label>
+            <input
+              type="text"
+              value={userAnswers.on}
+              onChange={(e) => handleInputChange("on", e.target.value)}
               style={{
-                marginTop: "5px",
-                color: isCorrect.on ? "green" : "red",
+                width: "100%",
+                padding: "8px",
+                fontSize: "16px",
+                backgroundColor: showResult
+                  ? isCorrect.on
+                    ? "#d4edda"
+                    : "#f8d7da"
+                  : "white",
               }}
-            >
-              {isCorrect.on
-                ? "✓ Đúng!"
-                : `✗ Sai! Đáp án: ${
-                    Array.isArray(currentKanji.on)
-                      ? currentKanji.on.join("、")
-                      : currentKanji.on
-                  }`}
-            </div>
-          )}
-        </div>
+              disabled={showResult}
+            />
+            {showResult && (
+              <div
+                style={{
+                  marginTop: "5px",
+                  color: isCorrect.on ? "green" : "red",
+                }}
+              >
+                {isCorrect.on
+                  ? "✓ Đúng!"
+                  : `✗ Sai! Đáp án: ${
+                      Array.isArray(currentKanji.on)
+                        ? currentKanji.on.join("、")
+                        : currentKanji.on
+                    }`}
+              </div>
+            )}
+          </div>
+        )}
 
         <div style={{ textAlign: "center", marginTop: "20px" }}>
           <button
