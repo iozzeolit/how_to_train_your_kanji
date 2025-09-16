@@ -6,6 +6,7 @@ import * as XLSX from "xlsx";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./Navbar";
 import KanjiList from "./KanjiList";
+import RandomKanji from "./RandomKanji";
 
 function App() {
   const fileInputRef = useRef();
@@ -33,13 +34,23 @@ function App() {
         for (let i = 1; i < rows.length; i++) {
           const row = rows[i];
           if (row.length >= 6) {
-            result.push({
-              kanji: row[0],
-              hanviet: row[1],
-              kun: row[2],
-              on: row[3],
-              example: [row[4], row[5]],
-            });
+            // Kiểm tra nếu có kanji (cột A không trống)
+            if (row[0] && row[0].trim() !== "") {
+              result.push({
+                kanji: row[0],
+                hanviet: row[1],
+                kun: row[2],
+                on: row[3],
+                example: [row[4], row[5]],
+              });
+            } else {
+              // Nếu không có kanji, thêm example vào kanji trước đó
+              if (result.length > 0 && (row[4] || row[5])) {
+                const lastKanji = result[result.length - 1];
+                if (row[4]) lastKanji.example.push(row[4]);
+                if (row[5]) lastKanji.example.push(row[5]);
+              }
+            }
           }
         }
         setKanjiData(result);
@@ -78,6 +89,10 @@ function App() {
         <Route
           path="/kanji-list"
           element={<KanjiList kanjiData={kanjiData} />}
+        />
+        <Route
+          path="/random-kanji"
+          element={<RandomKanji kanjiData={kanjiData} />}
         />
       </Routes>
     </Router>

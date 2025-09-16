@@ -10,8 +10,17 @@ function Navbar() {
       >
         Trang chủ
       </Link>
-      <Link to="/kanji-list" style={{ color: "white", textDecoration: "none" }}>
+      <Link
+        to="/kanji-list"
+        style={{ color: "white", marginRight: "20px", textDecoration: "none" }}
+      >
         Xem các chữ đã đọc
+      </Link>
+      <Link
+        to="/random-kanji"
+        style={{ color: "white", textDecoration: "none" }}
+      >
+        Học chữ ngẫu nhiên
       </Link>
     </nav>
   );
