@@ -25,6 +25,7 @@ function RandomKanji({ kanjiData }) {
       setCurrentKanji(kanjiData[randomIndex]);
       setShowResult(false);
       setUserAnswers({ hanviet: "", kun: "", on: "" });
+      setIsCorrect({ hanviet: false, kun: false, on: false });
     }
   }, [kanjiData]);
 
@@ -60,6 +61,7 @@ function RandomKanji({ kanjiData }) {
       setCurrentKanji(kanjiData[randomIndex]);
       setShowResult(false);
       setUserAnswers({ hanviet: "", kun: "", on: "" });
+      setIsCorrect({ hanviet: false, kun: false, on: false });
     }
   };
 
@@ -201,38 +203,37 @@ function RandomKanji({ kanjiData }) {
         </div>
 
         <div style={{ textAlign: "center", marginTop: "20px" }}>
-          {!showResult ? (
-            <button
-              type="submit"
-              style={{
-                padding: "10px 20px",
-                fontSize: "16px",
-                backgroundColor: "#007bff",
-                color: "white",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
-            >
-              Kiểm tra
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={getNextKanji}
-              style={{
-                padding: "10px 20px",
-                fontSize: "16px",
-                backgroundColor: "#28a745",
-                color: "white",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
-            >
-              Chữ tiếp theo
-            </button>
-          )}
+          <button
+            type="submit"
+            style={{
+              padding: "10px 20px",
+              fontSize: "16px",
+              backgroundColor: "#007bff",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+              marginRight: "10px",
+            }}
+            disabled={showResult}
+          >
+            Kiểm tra
+          </button>
+          <button
+            type="button"
+            onClick={getNextKanji}
+            style={{
+              padding: "10px 20px",
+              fontSize: "16px",
+              backgroundColor: "#28a745",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Chữ tiếp theo
+          </button>
         </div>
       </form>
 
