@@ -129,7 +129,7 @@ function KanjiQuiz({
       case "updated":
         return { icon: "🔄", color: "#ffc107", text: "Cập nhật" };
       case "existing":
-        return { icon: "✅", color: "#6c757d", text: "Không đổi" };
+        return { icon: "✅", color: "#6c757d", text: "Cũ" };
       default:
         return { icon: "", color: "#6c757d", text: "" };
     }

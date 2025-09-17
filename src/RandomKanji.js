@@ -10,6 +10,7 @@ function RandomKanji({ kanjiData }) {
     existing: true,
     updated: true,
     new: true,
+    learned: false,
   });
   const [filteredKanjiData, setFilteredKanjiData] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -39,10 +40,53 @@ function RandomKanji({ kanjiData }) {
 
   // Filter and prepare kanji data based on selected types
   const filterKanjiData = () => {
+    const learnedKanjiList = getLearnedKanji();
+    
     return kanjiData.filter((kanji) => {
+      // Kiểm tra nếu kanji này thuộc loại "learned"
+      const isLearned = learnedKanjiList.includes(kanji.kanji);
+      
+      // Nếu tick "learned" và kanji này đã học
+      if (kanjiTypes.learned && isLearned) {
+        return true;
+      }
+      
+      // Kiểm tra các loại kanji thông thường (existing, updated, new)
       const status = kanji.status || "existing";
-      return kanjiTypes[status];
+      if (kanjiTypes[status]) {
+        // Chỉ include nếu kanji này KHÔNG thuộc "learned" (tránh trùng lặp)
+        return !isLearned;
+      }
+      
+      return false;
     });
+  };
+
+  // Lấy danh sách kanji đã học từ Daily Learning
+  const getLearnedKanji = () => {
+    const dailyProgress = JSON.parse(localStorage.getItem("dailyProgress") || "{}");
+    const learningPlan = JSON.parse(localStorage.getItem("dailyLearningPlan") || "[]");
+    const learnedKanji = [];
+
+    // Duyệt qua tất cả các ngày đã hoàn thành
+    Object.keys(dailyProgress).forEach(dayKey => {
+      const dayNumber = parseInt(dayKey.replace('day', ''));
+      const dayPlan = learningPlan[dayNumber - 1];
+      
+      if (dayPlan && dayPlan.kanji) {
+        const completedIndices = dailyProgress[dayKey] || [];
+        // Nếu hoàn thành tất cả kanji trong ngày đó
+        if (completedIndices.length === dayPlan.kanji.length) {
+          dayPlan.kanji.forEach(kanji => {
+            if (!learnedKanji.includes(kanji.kanji)) {
+              learnedKanji.push(kanji.kanji);
+            }
+          });
+        }
+      }
+    });
+
+    return learnedKanji;
   };
 
   // Start quiz with selected configuration
@@ -373,6 +417,7 @@ function RandomKanji({ kanjiData }) {
         .length,
       updated: kanjiData.filter((k) => k.status === "updated").length,
       new: kanjiData.filter((k) => k.status === "new").length,
+      learned: getLearnedKanji().length,
     };
 
     return (
@@ -459,7 +504,7 @@ function RandomKanji({ kanjiData }) {
                 onChange={() => handleKanjiTypeChange("existing")}
                 style={{ marginRight: "10px" }}
               />
-              <span>✅ Từ không đổi ({stats.existing} từ)</span>
+              <span>✅ Từ cũ ({stats.existing} từ)</span>
             </label>
             <label
               style={{
@@ -490,6 +535,32 @@ function RandomKanji({ kanjiData }) {
                 style={{ marginRight: "10px" }}
               />
               <span>🆕 Từ mới ({stats.new} từ)</span>
+            </label>
+
+            {/* Divider */}
+            <div
+              style={{
+                height: "1px",
+                backgroundColor: "#dee2e6",
+                margin: "8px 0",
+              }}
+            ></div>
+
+            {/* Learned Kanji Filter */}
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={kanjiTypes.learned}
+                onChange={() => handleKanjiTypeChange("learned")}
+                style={{ marginRight: "10px" }}
+              />
+              <span>📚 Các chữ đã học ({stats.learned} chữ)</span>
             </label>
           </div>
 
