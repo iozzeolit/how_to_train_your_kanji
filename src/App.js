@@ -12,6 +12,7 @@ import DailyLearning from "./DailyLearning";
 function App() {
   const fileInputRef = useRef();
   const [kanjiData, setKanjiData] = useState([]);
+  const [importMode, setImportMode] = useState("merge"); // 'merge' hoặc 'replace'
 
   // Lấy dữ liệu từ localStorage khi khởi động app
   useEffect(() => {
@@ -80,8 +81,11 @@ function App() {
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
 
-    // Lấy dữ liệu cũ từ localStorage để so sánh
-    const oldKanjiData = JSON.parse(localStorage.getItem("kanjiData") || "[]");
+    // Lấy dữ liệu cũ từ localStorage để so sánh (chỉ khi merge mode)
+    const oldKanjiData =
+      importMode === "merge"
+        ? JSON.parse(localStorage.getItem("kanjiData") || "[]")
+        : [];
     const oldKanjiMap = {};
     oldKanjiData.forEach((item) => {
       oldKanjiMap[item.kanji] = item;
@@ -242,17 +246,49 @@ function App() {
       total: result.length,
     };
 
-    setKanjiData(result);
-    localStorage.setItem("kanjiData", JSON.stringify(result));
+    // Xử lý dữ liệu theo chế độ import
+    let finalData;
+    if (importMode === "merge") {
+      // Merge mode: Kết hợp dữ liệu cũ và mới
+      const newKanjiMap = {};
+      result.forEach((item) => {
+        newKanjiMap[item.kanji] = item;
+      });
+
+      // Giữ lại kanji cũ không có trong file mới
+      const mergedData = [...result];
+      oldKanjiData.forEach((oldItem) => {
+        if (!newKanjiMap[oldItem.kanji]) {
+          mergedData.push(oldItem);
+        }
+      });
+
+      finalData = mergedData;
+    } else {
+      // Replace mode: Chỉ lấy dữ liệu từ file mới
+      finalData = result;
+      stats.removed = oldKanjiData.length;
+    }
+
+    setKanjiData(finalData);
+    localStorage.setItem("kanjiData", JSON.stringify(finalData));
 
     // Hiển thị thống kê chi tiết
-    alert(
-      `Đã đọc ${stats.total} dòng dữ liệu từ ${fileName}!\n\n` +
-        `📊 Thống kê:\n` +
-        `🆕 Kanji mới: ${stats.new}\n` +
-        `🔄 Kanji cập nhật: ${stats.updated}\n` +
-        `✅ Kanji không đổi: ${stats.existing}`
-    );
+    const alertMessage =
+      importMode === "merge"
+        ? `Đã đọc ${stats.total} dòng dữ liệu từ ${fileName}!\n\n` +
+          `📊 Thống kê (Chế độ: Merge):\n` +
+          `🆕 Kanji mới: ${stats.new}\n` +
+          `🔄 Kanji cập nhật: ${stats.updated}\n` +
+          `✅ Kanji không đổi: ${stats.existing}\n` +
+          `📊 Tổng kanji hiện tại: ${finalData.length}`
+        : `Đã đọc ${stats.total} dòng dữ liệu từ ${fileName}!\n\n` +
+          `📊 Thống kê (Chế độ: Replace):\n` +
+          `🆕 Kanji từ file: ${stats.total}\n` +
+          `🗑️ Kanji cũ đã xóa: ${stats.removed}\n` +
+          `📊 Tổng kanji hiện tại: ${finalData.length}`;
+
+    alert(alertMessage);
   };
 
   const handleFileChange = (event) => {
@@ -311,6 +347,77 @@ function App() {
                       alignItems: "center",
                     }}
                   >
+                    {/* Import Mode Selection */}
+                    <div
+                      style={{
+                        backgroundColor: "#f8f9fa",
+                        padding: "15px",
+                        borderRadius: "8px",
+                        border: "1px solid #dee2e6",
+                        marginBottom: "15px",
+                        textAlign: "left",
+                      }}
+                    >
+                      <h4
+                        style={{
+                          margin: "0 0 10px 0",
+                          color: "#495057",
+                          fontSize: "16px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        🔧 Chế độ import dữ liệu:
+                      </h4>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "8px",
+                        }}
+                      >
+                        <label
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                            color: "#495057",
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="importMode"
+                            value="merge"
+                            checked={importMode === "merge"}
+                            onChange={(e) => setImportMode(e.target.value)}
+                            style={{ marginRight: "8px" }}
+                          />
+                          <strong>🔄 Giữ lại + Thêm/Cập nhật</strong> - Kết hợp
+                          dữ liệu cũ với dữ liệu mới
+                        </label>
+                        <label
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                            color: "#495057",
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="importMode"
+                            value="replace"
+                            checked={importMode === "replace"}
+                            onChange={(e) => setImportMode(e.target.value)}
+                            style={{ marginRight: "8px" }}
+                          />
+                          <strong>🗑️ Chỉ lấy từ file mới</strong> - Xóa hết dữ
+                          liệu cũ, chỉ giữ lại từ file
+                        </label>
+                      </div>
+                    </div>
+
                     <button
                       onClick={loadDefaultFile}
                       style={{
