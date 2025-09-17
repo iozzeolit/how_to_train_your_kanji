@@ -564,7 +564,10 @@ function RandomKanji({ kanjiData }) {
                 onChange={() => handleKanjiTypeChange("learned")}
                 style={{ marginRight: "10px" }}
               />
-              <span>📚 Các chữ đã học ({stats.learned} chữ)</span>
+              <span>
+                📚 Các từ đã học ({stats.learned} từ)-Nếu ko tick ô này thì đề
+                sẽ gồm các chữ chưa học
+              </span>
             </label>
           </div>
 
