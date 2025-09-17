@@ -70,6 +70,14 @@ function Navbar() {
       >
         📅 Học theo ngày
       </Link>
+      <Link
+        to="/guide"
+        style={linkStyle}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        📖 Hướng dẫn
+      </Link>
     </nav>
   );
 }

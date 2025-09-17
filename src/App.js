@@ -8,6 +8,7 @@ import Navbar from "./Navbar";
 import KanjiList from "./KanjiList";
 import RandomKanji from "./RandomKanji";
 import DailyLearning from "./DailyLearning";
+import Guide from "./Guide";
 
 function App() {
   const fileInputRef = useRef();
@@ -608,6 +609,7 @@ function App() {
           path="/daily-learning"
           element={<DailyLearning kanjiData={kanjiData} />}
         />
+        <Route path="/guide" element={<Guide />} />
       </Routes>
     </Router>
   );
