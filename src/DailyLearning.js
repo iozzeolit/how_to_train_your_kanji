@@ -442,20 +442,6 @@ function DailyLearning({ kanjiData }) {
     return baseLabel;
   };
 
-  // Hàm tạo biểu tượng trạng thái kanji
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "new":
-        return { icon: "🆕", color: "#28a745", text: "Mới" };
-      case "updated":
-        return { icon: "🔄", color: "#ffc107", text: "Cập nhật" };
-      case "existing":
-        return { icon: "✅", color: "#6c757d", text: "Không đổi" };
-      default:
-        return { icon: "", color: "#6c757d", text: "" };
-    }
-  };
-
   if (kanjiData.length === 0) {
     return (
       <div style={{ padding: "20px", textAlign: "center" }}>
@@ -675,29 +661,6 @@ function DailyLearning({ kanjiData }) {
                         }}
                       >
                         {kanji.kanji}
-                        {/* Status indicator for kanji */}
-                        {kanji.status && kanji.status !== "existing" && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "-10px",
-                              right: "-10px",
-                              fontSize: "16px",
-                              padding: "2px 6px",
-                              borderRadius: "12px",
-                              backgroundColor:
-                                getStatusIcon(kanji.status).color + "20",
-                              color: getStatusIcon(kanji.status).color,
-                              border: `1px solid ${
-                                getStatusIcon(kanji.status).color
-                              }40`,
-                              fontWeight: "bold",
-                            }}
-                            title={`Kanji ${getStatusIcon(kanji.status).text}`}
-                          >
-                            {getStatusIcon(kanji.status).icon}
-                          </div>
-                        )}
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ marginBottom: "5px", fontSize: "24px" }}>
