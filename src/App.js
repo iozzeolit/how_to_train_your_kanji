@@ -355,7 +355,7 @@ function App() {
   return (
     <Router>
       <Navbar />
-      
+
       {/* Hidden file input */}
       <input
         type="file"
@@ -372,109 +372,59 @@ function App() {
             <div className="App">
               <header className="App-header">
                 <div style={{ textAlign: "center", padding: "40px 20px" }}>
-                  <h1>🎌 How to Train Your Kanji</h1>
-                  <p style={{ fontSize: "18px", marginBottom: "40px" }}>
-                    Ứng dụng học Kanji thông minh và hiệu quả
-                  </p>
+                  <h1>🎌 How to Train Your FU KIN Kanji</h1>
 
-                  {kanjiData.length > 0 ? (
-                    <div
-                      style={{
-                        backgroundColor: "#e9f7ef",
-                        padding: "30px",
-                        borderRadius: "15px",
-                        border: "1px solid #c3e6cb",
-                        maxWidth: "600px",
-                        margin: "0 auto",
-                        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-                      }}
-                    >
-                      <h3
-                        style={{
-                          color: "#155724",
-                          marginTop: 0,
-                          fontSize: "24px",
-                        }}
-                      >
-                        ✅ Đã tải {kanjiData.length} kanji vào hệ thống!
-                      </h3>
-                      <p
-                        style={{
-                          color: "#155724",
-                          marginBottom: 0,
-                          fontSize: "16px",
-                        }}
-                      >
-                        Bạn có thể bắt đầu học hoặc xem danh sách kanji bằng
-                        menu phía trên.
-                      </p>
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        backgroundColor: "#fff3cd",
-                        padding: "30px",
-                        borderRadius: "15px",
-                        border: "1px solid #ffeaa7",
-                        maxWidth: "600px",
-                        margin: "0 auto",
-                        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-                      }}
-                    >
-                      <h3
-                        style={{
-                          color: "#856404",
-                          marginTop: 0,
-                          fontSize: "24px",
-                        }}
-                      >
-                        📚 Chưa có dữ liệu Kanji
-                      </h3>
-                      <p
-                        style={{
-                          color: "#856404",
-                          marginBottom: "20px",
-                          fontSize: "16px",
-                        }}
-                      >
-                        Vui lòng tải file Excel chứa dữ liệu Kanji bằng các nút bên dưới.
-                      </p>
-                    </div>
-                  )}
-                  
                   {/* Import File Section - Centered */}
-                  <div style={{
-                    maxWidth: "700px",
-                    margin: "40px auto 0",
-                    backgroundColor: "#f8f9fa",
-                    padding: "30px",
-                    borderRadius: "15px",
-                    border: "1px solid #dee2e6",
-                    boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
-                  }}>
+                  <div
+                    style={{
+                      maxWidth: "700px",
+                      margin: "40px auto 0",
+                      backgroundColor: "#f8f9fa",
+                      padding: "30px",
+                      borderRadius: "15px",
+                      border: "1px solid #dee2e6",
+                      boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                    }}
+                  >
                     {/* Import Mode Selection */}
                     <div style={{ marginBottom: "25px" }}>
-                      <h3 style={{ color: "#495057", marginBottom: "15px", textAlign: "center" }}>
+                      <h3
+                        style={{
+                          color: "#495057",
+                          marginBottom: "15px",
+                          textAlign: "center",
+                        }}
+                      >
                         🔧 Chế độ import dữ liệu
                       </h3>
-                      <div style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        gap: "20px",
-                        flexWrap: "wrap"
-                      }}>
-                        <label style={{
+                      <div
+                        style={{
                           display: "flex",
-                          alignItems: "center",
-                          cursor: "pointer",
-                          fontSize: "16px",
-                          color: "#495057",
-                          padding: "12px 20px",
-                          backgroundColor: importMode === "merge" ? "#e3f2fd" : "white",
-                          borderRadius: "10px",
-                          border: "2px solid " + (importMode === "merge" ? "#2196F3" : "#dee2e6"),
-                          transition: "all 0.3s ease"
-                        }}>
+                          justifyContent: "center",
+                          gap: "20px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <label
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            cursor: "pointer",
+                            fontSize: "16px",
+                            color: "#495057",
+                            padding: "12px 20px",
+                            backgroundColor:
+                              importMode === "merge" ? "#e3f2fd" : "white",
+                            borderRadius: "10px",
+                            border:
+                              "2px solid " +
+                              (importMode === "merge" ? "#2196F3" : "#dee2e6"),
+                            transition: "all 0.3s ease",
+                            flex: "1",
+                            maxWidth: "300px",
+                            minWidth: "280px",
+                          }}
+                        >
                           <input
                             type="radio"
                             name="importMode"
@@ -484,24 +434,41 @@ function App() {
                             style={{ marginRight: "10px" }}
                           />
                           <div>
-                            <strong>🔄 Kết hợp dữ liệu</strong>
-                            <div style={{ fontSize: "12px", color: "#666", marginTop: "2px" }}>
-                              Giữ lại dữ liệu cũ và thêm/cập nhật
+                            <strong>🔄 Thêm, cập nhật dữ liệu</strong>
+                            <div
+                              style={{
+                                fontSize: "16px",
+                                color: "#666",
+                                marginTop: "2px",
+                              }}
+                            >
+                              Kết hợp dữ liệu cũ và thêm/cập nhật với dữ liệu
+                              mới được upload
                             </div>
                           </div>
                         </label>
-                        <label style={{
-                          display: "flex",
-                          alignItems: "center",
-                          cursor: "pointer",
-                          fontSize: "16px",
-                          color: "#495057",
-                          padding: "12px 20px",
-                          backgroundColor: importMode === "replace" ? "#e3f2fd" : "white",
-                          borderRadius: "10px",
-                          border: "2px solid " + (importMode === "replace" ? "#2196F3" : "#dee2e6"),
-                          transition: "all 0.3s ease"
-                        }}>
+                        <label
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            cursor: "pointer",
+                            fontSize: "16px",
+                            color: "#495057",
+                            padding: "12px 20px",
+                            backgroundColor:
+                              importMode === "replace" ? "#e3f2fd" : "white",
+                            borderRadius: "10px",
+                            border:
+                              "2px solid " +
+                              (importMode === "replace"
+                                ? "#2196F3"
+                                : "#dee2e6"),
+                            transition: "all 0.3s ease",
+                            flex: "1",
+                            maxWidth: "300px",
+                            minWidth: "280px",
+                          }}
+                        >
                           <input
                             type="radio"
                             name="importMode"
@@ -511,9 +478,15 @@ function App() {
                             style={{ marginRight: "10px" }}
                           />
                           <div>
-                            <strong>🗑️ Thay thế hoàn toàn</strong>
-                            <div style={{ fontSize: "12px", color: "#666", marginTop: "2px" }}>
-                              Xóa tất cả dữ liệu cũ
+                            <strong>🗑️ Chỉ dùng dữ liệu mới</strong>
+                            <div
+                              style={{
+                                fontSize: "16px",
+                                color: "#666",
+                                marginTop: "2px",
+                              }}
+                            >
+                              Xóa dữ liệu cũ và chỉ dùng dữ liệu mới upload
                             </div>
                           </div>
                         </label>
@@ -521,12 +494,14 @@ function App() {
                     </div>
 
                     {/* Upload buttons */}
-                    <div style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "15px",
-                      alignItems: "center"
-                    }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "15px",
+                        alignItems: "center",
+                      }}
+                    >
                       <button
                         onClick={downloadDefaultFile}
                         style={{
@@ -538,13 +513,13 @@ function App() {
                           borderRadius: "10px",
                           cursor: "pointer",
                           width: "100%",
-                          maxWidth: "350px",
+                          maxWidth: "400px",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           gap: "10px",
                           fontWeight: "600",
-                          transition: "all 0.3s ease"
+                          transition: "all 0.3s ease",
                         }}
                         onMouseEnter={(e) => {
                           e.target.style.backgroundColor = "#138496";
@@ -558,7 +533,7 @@ function App() {
                       >
                         📥 Tải file mặc định (KANJI_N3.xlsx)
                       </button>
-                      
+
                       <button
                         onClick={loadDefaultFile}
                         style={{
@@ -570,9 +545,9 @@ function App() {
                           borderRadius: "10px",
                           cursor: "pointer",
                           width: "100%",
-                          maxWidth: "350px",
+                          maxWidth: "400px",
                           fontWeight: "600",
-                          transition: "all 0.3s ease"
+                          transition: "all 0.3s ease",
                         }}
                         onMouseEnter={(e) => {
                           e.target.style.backgroundColor = "#0056b3";
@@ -583,9 +558,9 @@ function App() {
                           e.target.style.transform = "translateY(0)";
                         }}
                       >
-                        📂 Upload file mặc định vào hệ thống
+                        📂 Upload file mặc định (KANJI_N3.xlsx)
                       </button>
-                      
+
                       <button
                         onClick={() => fileInputRef.current.click()}
                         style={{
@@ -597,9 +572,9 @@ function App() {
                           borderRadius: "10px",
                           cursor: "pointer",
                           width: "100%",
-                          maxWidth: "350px",
+                          maxWidth: "400px",
                           fontWeight: "600",
-                          transition: "all 0.3s ease"
+                          transition: "all 0.3s ease",
                         }}
                         onMouseEnter={(e) => {
                           e.target.style.backgroundColor = "#1e7e34";
