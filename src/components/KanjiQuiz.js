@@ -77,7 +77,7 @@ function KanjiQuiz({
       >
         {currentKanji.kanji}
         {/* Status indicator */}
-        {currentKanji.status && currentKanji.status !== 'existing' && (
+        {currentKanji.status && currentKanji.status !== "existing" && (
           <div
             style={{
               position: "absolute",

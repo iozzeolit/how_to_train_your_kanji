@@ -535,7 +535,7 @@ function DailyLearning({ kanjiData }) {
                       >
                         {kanji.kanji}
                         {/* Status indicator for kanji */}
-                        {kanji.status && kanji.status !== 'existing' && (
+                        {kanji.status && kanji.status !== "existing" && (
                           <div
                             style={{
                               position: "absolute",

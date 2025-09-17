@@ -423,12 +423,18 @@ function KanjiList({ kanjiData }) {
               // Hàng đầu tiên với kanji và 2 ví dụ đầu
               rows.push(
                 <tr key={`${idx}-main`}>
-                  <td style={{ 
-                    fontSize: "24px", 
-                    fontWeight: "bold",
-                    backgroundColor: item.status === 'new' ? '#e8f5e8' : 
-                                    item.status === 'updated' ? '#fff8e1' : 'transparent'
-                  }}>
+                  <td
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: "bold",
+                      backgroundColor:
+                        item.status === "new"
+                          ? "#e8f5e8"
+                          : item.status === "updated"
+                          ? "#fff8e1"
+                          : "transparent",
+                    }}
+                  >
                     {item.kanji}
                   </td>
                   <td>
