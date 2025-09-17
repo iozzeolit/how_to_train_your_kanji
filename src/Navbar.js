@@ -9,7 +9,7 @@ function Navbar() {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: "40px"
+    gap: "40px",
   };
 
   const linkStyle = {
@@ -21,7 +21,7 @@ function Navbar() {
     borderRadius: "8px",
     transition: "all 0.3s ease",
     background: "rgba(255,255,255,0.1)",
-    border: "1px solid rgba(255,255,255,0.2)"
+    border: "1px solid rgba(255,255,255,0.2)",
   };
 
   const handleMouseEnter = (e) => {

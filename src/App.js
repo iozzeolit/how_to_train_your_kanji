@@ -355,14 +355,16 @@ function App() {
   return (
     <Router>
       <Navbar />
-      
+
       {/* File Upload Toolbar - Below Navbar */}
-      <div style={{
-        backgroundColor: "#f8f9fa",
-        padding: "15px 20px",
-        borderBottom: "1px solid #dee2e6",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-      }}>
+      <div
+        style={{
+          backgroundColor: "#f8f9fa",
+          padding: "15px 20px",
+          borderBottom: "1px solid #dee2e6",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+        }}
+      >
         <input
           type="file"
           accept=".xlsx,.xls"
@@ -370,32 +372,40 @@ function App() {
           style={{ display: "none" }}
           onChange={handleFileChange}
         />
-        
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "20px",
-          flexWrap: "wrap"
-        }}>
-          {/* Import Mode Selection */}
-          <div style={{
+
+        <div
+          style={{
             display: "flex",
             alignItems: "center",
-            gap: "15px",
-            backgroundColor: "white",
-            padding: "10px 15px",
-            borderRadius: "8px",
-            border: "1px solid #dee2e6"
-          }}>
-            <span style={{ fontWeight: "600", color: "#495057" }}>🔧 Chế độ:</span>
-            <label style={{
+            justifyContent: "center",
+            gap: "20px",
+            flexWrap: "wrap",
+          }}
+        >
+          {/* Import Mode Selection */}
+          <div
+            style={{
               display: "flex",
               alignItems: "center",
-              cursor: "pointer",
-              fontSize: "14px",
-              color: "#495057"
-            }}>
+              gap: "15px",
+              backgroundColor: "white",
+              padding: "10px 15px",
+              borderRadius: "8px",
+              border: "1px solid #dee2e6",
+            }}
+          >
+            <span style={{ fontWeight: "600", color: "#495057" }}>
+              🔧 Chế độ:
+            </span>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+                fontSize: "14px",
+                color: "#495057",
+              }}
+            >
               <input
                 type="radio"
                 name="importMode"
@@ -406,13 +416,15 @@ function App() {
               />
               🔄 Kết hợp
             </label>
-            <label style={{
-              display: "flex",
-              alignItems: "center",
-              cursor: "pointer",
-              fontSize: "14px",
-              color: "#495057"
-            }}>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+                fontSize: "14px",
+                color: "#495057",
+              }}
+            >
               <input
                 type="radio"
                 name="importMode"
@@ -426,11 +438,13 @@ function App() {
           </div>
 
           {/* Upload Buttons */}
-          <div style={{
-            display: "flex",
-            gap: "10px",
-            alignItems: "center"
-          }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              alignItems: "center",
+            }}
+          >
             <button
               onClick={downloadDefaultFile}
               style={{
@@ -444,13 +458,13 @@ function App() {
                 display: "flex",
                 alignItems: "center",
                 gap: "5px",
-                fontWeight: "500"
+                fontWeight: "500",
               }}
               title="Tải file mẫu KANJI_N3.xlsx về máy"
             >
               📥 Tải file mặc định
             </button>
-            
+
             <button
               onClick={loadDefaultFile}
               style={{
@@ -461,12 +475,12 @@ function App() {
                 border: "none",
                 borderRadius: "6px",
                 cursor: "pointer",
-                fontWeight: "500"
+                fontWeight: "500",
               }}
             >
               📂 Upload file mặc định
             </button>
-            
+
             <button
               onClick={() => fileInputRef.current.click()}
               style={{
@@ -477,7 +491,7 @@ function App() {
                 border: "none",
                 borderRadius: "6px",
                 cursor: "pointer",
-                fontWeight: "500"
+                fontWeight: "500",
               }}
             >
               📄 Upload file Excel
@@ -485,7 +499,7 @@ function App() {
           </div>
         </div>
       </div>
-      
+
       <Routes>
         <Route
           path="/"
@@ -497,39 +511,69 @@ function App() {
                   <p style={{ fontSize: "18px", marginBottom: "40px" }}>
                     Ứng dụng học Kanji thông minh và hiệu quả
                   </p>
-                  
+
                   {kanjiData.length > 0 ? (
-                    <div style={{
-                      backgroundColor: "#e9f7ef",
-                      padding: "30px",
-                      borderRadius: "15px",
-                      border: "1px solid #c3e6cb",
-                      maxWidth: "600px",
-                      margin: "0 auto",
-                      boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
-                    }}>
-                      <h3 style={{ color: "#155724", marginTop: 0, fontSize: "24px" }}>
+                    <div
+                      style={{
+                        backgroundColor: "#e9f7ef",
+                        padding: "30px",
+                        borderRadius: "15px",
+                        border: "1px solid #c3e6cb",
+                        maxWidth: "600px",
+                        margin: "0 auto",
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                      }}
+                    >
+                      <h3
+                        style={{
+                          color: "#155724",
+                          marginTop: 0,
+                          fontSize: "24px",
+                        }}
+                      >
                         ✅ Đã tải {kanjiData.length} kanji vào hệ thống!
                       </h3>
-                      <p style={{ color: "#155724", marginBottom: 0, fontSize: "16px" }}>
-                        Bạn có thể bắt đầu học hoặc xem danh sách kanji bằng menu phía trên.
+                      <p
+                        style={{
+                          color: "#155724",
+                          marginBottom: 0,
+                          fontSize: "16px",
+                        }}
+                      >
+                        Bạn có thể bắt đầu học hoặc xem danh sách kanji bằng
+                        menu phía trên.
                       </p>
                     </div>
                   ) : (
-                    <div style={{
-                      backgroundColor: "#fff3cd",
-                      padding: "30px",
-                      borderRadius: "15px",
-                      border: "1px solid #ffeaa7",
-                      maxWidth: "600px",
-                      margin: "0 auto",
-                      boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
-                    }}>
-                      <h3 style={{ color: "#856404", marginTop: 0, fontSize: "24px" }}>
+                    <div
+                      style={{
+                        backgroundColor: "#fff3cd",
+                        padding: "30px",
+                        borderRadius: "15px",
+                        border: "1px solid #ffeaa7",
+                        maxWidth: "600px",
+                        margin: "0 auto",
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                      }}
+                    >
+                      <h3
+                        style={{
+                          color: "#856404",
+                          marginTop: 0,
+                          fontSize: "24px",
+                        }}
+                      >
                         📚 Chưa có dữ liệu Kanji
                       </h3>
-                      <p style={{ color: "#856404", marginBottom: 0, fontSize: "16px" }}>
-                        Vui lòng tải file Excel chứa dữ liệu Kanji bằng thanh công cụ phía trên.
+                      <p
+                        style={{
+                          color: "#856404",
+                          marginBottom: 0,
+                          fontSize: "16px",
+                        }}
+                      >
+                        Vui lòng tải file Excel chứa dữ liệu Kanji bằng thanh
+                        công cụ phía trên.
                       </p>
                     </div>
                   )}
