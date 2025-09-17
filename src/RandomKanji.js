@@ -41,43 +41,47 @@ function RandomKanji({ kanjiData }) {
   // Filter and prepare kanji data based on selected types
   const filterKanjiData = () => {
     const learnedKanjiList = getLearnedKanji();
-    
+
     return kanjiData.filter((kanji) => {
       // Kiểm tra nếu kanji này thuộc loại "learned"
       const isLearned = learnedKanjiList.includes(kanji.kanji);
-      
+
       // Nếu tick "learned" và kanji này đã học
       if (kanjiTypes.learned && isLearned) {
         return true;
       }
-      
+
       // Kiểm tra các loại kanji thông thường (existing, updated, new)
       const status = kanji.status || "existing";
       if (kanjiTypes[status]) {
         // Chỉ include nếu kanji này KHÔNG thuộc "learned" (tránh trùng lặp)
         return !isLearned;
       }
-      
+
       return false;
     });
   };
 
   // Lấy danh sách kanji đã học từ Daily Learning
   const getLearnedKanji = () => {
-    const dailyProgress = JSON.parse(localStorage.getItem("dailyProgress") || "{}");
-    const learningPlan = JSON.parse(localStorage.getItem("dailyLearningPlan") || "[]");
+    const dailyProgress = JSON.parse(
+      localStorage.getItem("dailyProgress") || "{}"
+    );
+    const learningPlan = JSON.parse(
+      localStorage.getItem("dailyLearningPlan") || "[]"
+    );
     const learnedKanji = [];
 
     // Duyệt qua tất cả các ngày đã hoàn thành
-    Object.keys(dailyProgress).forEach(dayKey => {
-      const dayNumber = parseInt(dayKey.replace('day', ''));
+    Object.keys(dailyProgress).forEach((dayKey) => {
+      const dayNumber = parseInt(dayKey.replace("day", ""));
       const dayPlan = learningPlan[dayNumber - 1];
-      
+
       if (dayPlan && dayPlan.kanji) {
         const completedIndices = dailyProgress[dayKey] || [];
         // Nếu hoàn thành tất cả kanji trong ngày đó
         if (completedIndices.length === dayPlan.kanji.length) {
-          dayPlan.kanji.forEach(kanji => {
+          dayPlan.kanji.forEach((kanji) => {
             if (!learnedKanji.includes(kanji.kanji)) {
               learnedKanji.push(kanji.kanji);
             }
