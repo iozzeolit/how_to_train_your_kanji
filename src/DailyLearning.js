@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ExampleWords from "./components/ExampleWords";
 
 function DailyLearning({ kanjiData }) {
   const [wordsPerDay, setWordsPerDay] = useState(10);
@@ -19,59 +20,6 @@ function DailyLearning({ kanjiData }) {
   });
   const [isPlanSet, setIsPlanSet] = useState(false);
   const [showStudyMode, setShowStudyMode] = useState(false);
-
-  // Hàm kiểm tra xem ký tự có phải kanji không
-  const isKanji = (char) => {
-    const code = char.charCodeAt(0);
-    return (
-      (code >= 0x4e00 && code <= 0x9faf) || // CJK Unified Ideographs
-      (code >= 0x3400 && code <= 0x4dbf) || // CJK Extension A
-      (code >= 0x20000 && code <= 0x2a6df)
-    ); // CJK Extension B
-  };
-
-  // Hàm tạo ruby text cho kanji và phonetic
-  const createRubyText = (text, phonetic) => {
-    if (!phonetic) return text;
-
-    const textChars = Array.from(text);
-    const phoneticChars = Array.from(phonetic);
-    const result = [];
-
-    let phoneticIndex = 0;
-
-    for (let i = 0; i < textChars.length; i++) {
-      const char = textChars[i];
-
-      if (isKanji(char)) {
-        // Nếu là kanji, tạo ruby với phonetic tương ứng
-        let rubyPhonetic = "";
-        // Lấy phonetic cho kanji này
-        if (phoneticIndex < phoneticChars.length) {
-          const remainingKanji = textChars.slice(i + 1).filter(isKanji).length;
-          const remainingPhonetic = phoneticChars.slice(phoneticIndex);
-          const phoneticPerKanji = Math.ceil(
-            remainingPhonetic.length / (remainingKanji + 1)
-          );
-
-          rubyPhonetic = remainingPhonetic.slice(0, phoneticPerKanji).join("");
-          phoneticIndex += phoneticPerKanji;
-        }
-
-        result.push(
-          <ruby key={i}>
-            {char}
-            <rt style={{ fontSize: "24px", color: "#666" }}>{rubyPhonetic}</rt>
-          </ruby>
-        );
-      } else {
-        // Nếu không phải kanji, hiển thị bình thường
-        result.push(<span key={i}>{char}</span>);
-      }
-    }
-
-    return result;
-  };
 
   // Load dữ liệu từ localStorage
   useEffect(() => {
@@ -617,43 +565,15 @@ function DailyLearning({ kanjiData }) {
                       <div
                         style={{
                           borderTop: "1px solid #e0e0e0",
-                          paddingTop: "10px",
+                          paddingTop: "0px",
+                          marginTop: "10px",
                         }}
                       >
-                        <strong style={{ fontSize: "24px", color: "#666" }}>
-                          Từ ví dụ:
-                        </strong>
-                        <div
-                          style={{
-                            marginTop: "8px",
-                            display: "grid",
-                            gap: "5px",
-                          }}
-                        >
-                          {kanji.example
-                            .filter(Boolean)
-                            .slice(0, 4)
-                            .map((example, idx) => (
-                              <div
-                                key={idx}
-                                style={{ fontSize: "36px", padding: "5px 0" }}
-                              >
-                                {typeof example === "string" ? (
-                                  example
-                                ) : typeof example === "object" &&
-                                  example.text ? (
-                                  <span>
-                                    {example.phonetic
-                                      ? createRubyText(
-                                          example.text,
-                                          example.phonetic
-                                        )
-                                      : example.text}
-                                  </span>
-                                ) : null}
-                              </div>
-                            ))}
-                        </div>
+                        <ExampleWords
+                          examples={kanji.example.slice(0, 4)}
+                          title="Từ ví dụ"
+                          fontSize="36px"
+                        />
                       </div>
                     )}
                   </div>
@@ -951,43 +871,7 @@ function DailyLearning({ kanjiData }) {
             </form>
 
             {showResult && currentKanji.example && (
-              <div
-                style={{
-                  marginTop: "20px",
-                  padding: "15px",
-                  backgroundColor: "#e9ecef",
-                  borderRadius: "5px",
-                }}
-              >
-                <h4>Từ ví dụ:</h4>
-                <div>
-                  {currentKanji.example && currentKanji.example.length > 0 ? (
-                    currentKanji.example.filter(Boolean).map((example, idx) => {
-                      if (typeof example === "string") {
-                        return (
-                          <div key={idx} style={{ marginBottom: "5px" }}>
-                            {example}
-                          </div>
-                        );
-                      } else if (typeof example === "object" && example.text) {
-                        return (
-                          <div
-                            key={idx}
-                            style={{ marginBottom: "10px", fontSize: "18px" }}
-                          >
-                            {example.phonetic
-                              ? createRubyText(example.text, example.phonetic)
-                              : example.text}
-                          </div>
-                        );
-                      }
-                      return null;
-                    })
-                  ) : (
-                    <p>Không có từ ví dụ nào.</p>
-                  )}
-                </div>
-              </div>
+              <ExampleWords examples={currentKanji.example} fontSize="18px" />
             )}
           </>
         )}
