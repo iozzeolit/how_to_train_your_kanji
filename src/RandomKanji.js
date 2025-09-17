@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ExampleWords from "./components/ExampleWords";
+import KanjiQuiz from "./components/KanjiQuiz";
 
 function RandomKanji({ kanjiData }) {
   const [currentKanji, setCurrentKanji] = useState(null);
@@ -64,21 +65,6 @@ function RandomKanji({ kanjiData }) {
       return reading.length > 0 && reading.some((r) => r.trim() !== "");
     }
     return reading.trim() !== "";
-  };
-
-  // Hàm tạo label với thông tin số lượng âm
-  const createReadingLabel = (baseLabel, reading) => {
-    if (!hasReading(reading)) return baseLabel;
-
-    if (Array.isArray(reading)) {
-      const validReadings = reading.filter((r) => r.trim() !== "");
-      if (validReadings.length > 1) {
-        return `${baseLabel} (từ này có ${validReadings.length} âm ${baseLabel
-          .toLowerCase()
-          .replace("âm ", "")})`;
-      }
-    }
-    return baseLabel;
   };
 
   const handleSubmit = (e) => {
@@ -213,242 +199,15 @@ function RandomKanji({ kanjiData }) {
     <div style={{ padding: "20px", margin: "0 auto" }}>
       <h2>Học chữ ngẫu nhiên</h2>
 
-      <div
-        style={{
-          fontSize: "72px",
-          textAlign: "center",
-          margin: "20px 0",
-          border: "2px solid #ccc",
-          padding: "20px",
-          backgroundColor: "#f9f9f9",
-          minHeight: "120px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {currentKanji?.kanji || "Không có dữ liệu"}
-      </div>
-
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "15px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>
-            Hán Việt:
-          </label>
-          <input
-            type="text"
-            value={userAnswers.hanviet}
-            onChange={(e) => handleInputChange("hanviet", e.target.value)}
-            style={{
-              width: "100%",
-              padding: "8px",
-              fontSize: "16px",
-              backgroundColor: showResult
-                ? isCorrect.hanviet
-                  ? "#d4edda"
-                  : "#f8d7da"
-                : "white",
-            }}
-            disabled={showResult}
-          />
-          {showResult && (
-            <div
-              style={{
-                marginTop: "5px",
-                color: isCorrect.hanviet ? "green" : "red",
-              }}
-            >
-              {isCorrect.hanviet
-                ? "✓ Đúng!"
-                : `✗ Sai! Đáp án: ${
-                    Array.isArray(currentKanji.hanviet)
-                      ? currentKanji.hanviet.join("、")
-                      : currentKanji.hanviet
-                  }`}
-            </div>
-          )}
-        </div>
-
-        {hasReading(currentKanji?.kun) && (
-          <div style={{ marginBottom: "15px" }}>
-            <label style={{ display: "block", marginBottom: "5px" }}>
-              {createReadingLabel("Âm Kun", currentKanji?.kun)}:
-            </label>
-            {Array.isArray(currentKanji.kun) &&
-            currentKanji.kun.filter((r) => r.trim() !== "").length > 1 ? (
-              // Multiple inputs for multiple kun readings
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                {currentKanji.kun
-                  .filter((r) => r.trim() !== "")
-                  .map((reading, index) => (
-                    <input
-                      key={index}
-                      type="text"
-                      value={userAnswers.kun[index] || ""}
-                      onChange={(e) =>
-                        handleInputChange("kun", e.target.value, index)
-                      }
-                      placeholder={`Âm kun thứ ${index + 1}`}
-                      style={{
-                        flex: "1",
-                        minWidth: "150px",
-                        padding: "8px",
-                        fontSize: "16px",
-                        backgroundColor: showResult
-                          ? isCorrect.kun
-                            ? "#d4edda"
-                            : "#f8d7da"
-                          : "white",
-                      }}
-                      disabled={showResult}
-                    />
-                  ))}
-              </div>
-            ) : (
-              // Single input for single kun reading
-              <input
-                type="text"
-                value={userAnswers.kun[0] || ""}
-                onChange={(e) => handleInputChange("kun", e.target.value, 0)}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  fontSize: "16px",
-                  backgroundColor: showResult
-                    ? isCorrect.kun
-                      ? "#d4edda"
-                      : "#f8d7da"
-                    : "white",
-                }}
-                disabled={showResult}
-              />
-            )}
-            {showResult && (
-              <div
-                style={{
-                  marginTop: "5px",
-                  color: isCorrect.kun ? "green" : "red",
-                }}
-              >
-                {isCorrect.kun
-                  ? "✓ Đúng!"
-                  : `✗ Sai! Đáp án: ${
-                      Array.isArray(currentKanji.kun)
-                        ? currentKanji.kun.join("、")
-                        : currentKanji.kun
-                    }`}
-              </div>
-            )}
-          </div>
-        )}
-
-        {hasReading(currentKanji?.on) && (
-          <div style={{ marginBottom: "15px" }}>
-            <label style={{ display: "block", marginBottom: "5px" }}>
-              {createReadingLabel("Âm On", currentKanji?.on)}:
-            </label>
-            {Array.isArray(currentKanji.on) &&
-            currentKanji.on.filter((r) => r.trim() !== "").length > 1 ? (
-              // Multiple inputs for multiple on readings
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                {currentKanji.on
-                  .filter((r) => r.trim() !== "")
-                  .map((reading, index) => (
-                    <input
-                      key={index}
-                      type="text"
-                      value={userAnswers.on[index] || ""}
-                      onChange={(e) =>
-                        handleInputChange("on", e.target.value, index)
-                      }
-                      placeholder={`Âm on thứ ${index + 1}`}
-                      style={{
-                        flex: "1",
-                        minWidth: "150px",
-                        padding: "8px",
-                        fontSize: "16px",
-                        backgroundColor: showResult
-                          ? isCorrect.on
-                            ? "#d4edda"
-                            : "#f8d7da"
-                          : "white",
-                      }}
-                      disabled={showResult}
-                    />
-                  ))}
-              </div>
-            ) : (
-              // Single input for single on reading
-              <input
-                type="text"
-                value={userAnswers.on[0] || ""}
-                onChange={(e) => handleInputChange("on", e.target.value, 0)}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  fontSize: "16px",
-                  backgroundColor: showResult
-                    ? isCorrect.on
-                      ? "#d4edda"
-                      : "#f8d7da"
-                    : "white",
-                }}
-                disabled={showResult}
-              />
-            )}
-            {showResult && (
-              <div
-                style={{
-                  marginTop: "5px",
-                  color: isCorrect.on ? "green" : "red",
-                }}
-              >
-                {isCorrect.on
-                  ? "✓ Đúng!"
-                  : `✗ Sai! Đáp án: ${
-                      Array.isArray(currentKanji.on)
-                        ? currentKanji.on.join("、")
-                        : currentKanji.on
-                    }`}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div style={{ textAlign: "center", marginTop: "20px" }}>
-          <button
-            type="submit"
-            style={{
-              padding: "10px 20px",
-              fontSize: "16px",
-              backgroundColor: "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              marginRight: "10px",
-            }}
-            disabled={showResult}
-          >
-            Kiểm tra
-          </button>
-          <button
-            type="button"
-            onClick={getNextKanji}
-            style={{
-              padding: "10px 20px",
-              fontSize: "16px",
-              backgroundColor: "#28a745",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-            }}
-          >
-            Chữ tiếp theo
-          </button>
-        </div>
-      </form>
+      <KanjiQuiz
+        currentKanji={currentKanji}
+        userAnswers={userAnswers}
+        showResult={showResult}
+        isCorrect={isCorrect}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        onNext={getNextKanji}
+      />
 
       {showResult && currentKanji.example && (
         <ExampleWords examples={currentKanji.example} />
