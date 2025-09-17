@@ -230,7 +230,7 @@ function KanjiQuiz({
               style={{
                 display: "flex",
                 alignItems: "center",
-                fontSize: "16px",
+                fontSize: "14px",
                 cursor: "pointer",
               }}
             >
