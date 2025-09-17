@@ -491,10 +491,11 @@ function DailyLearning({ kanjiData }) {
                     >
                       <div
                         style={{
-                          fontSize: "60px",
+                          fontSize: "70px",
                           fontWeight: "bold",
                           minWidth: "50px",
                           textAlign: "center",
+                          margin: "0px 5px",
                         }}
                       >
                         {kanji.kanji}
