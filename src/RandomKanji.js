@@ -55,7 +55,7 @@ function RandomKanji({ kanjiData }) {
         result.push(
           <ruby key={i}>
             {char}
-            <rt style={{ fontSize: "12px", color: "#666" }}>{rubyPhonetic}</rt>
+            <rt style={{ fontSize: "24px", color: "#666" }}>{rubyPhonetic}</rt>
           </ruby>
         );
       } else {
@@ -206,7 +206,7 @@ function RandomKanji({ kanjiData }) {
   }
 
   return (
-    <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
+    <div style={{ padding: "20px", margin: "0 auto" }}>
       <h2>Học chữ ngẫu nhiên</h2>
 
       <div
@@ -389,12 +389,15 @@ function RandomKanji({ kanjiData }) {
             borderRadius: "5px",
           }}
         >
-          <h4>Từ ví dụ:</h4>
+          <h4 style={{ fontSize: "24px" }}>Từ ví dụ:</h4>
           <div>
             {currentKanji.example.filter(Boolean).map((example, idx) => {
               if (typeof example === "string") {
                 return (
-                  <div key={idx} style={{ marginBottom: "5px" }}>
+                  <div
+                    key={idx}
+                    style={{ marginBottom: "5px", fontSize: "36px" }}
+                  >
                     {example}
                   </div>
                 );
@@ -402,7 +405,7 @@ function RandomKanji({ kanjiData }) {
                 return (
                   <div
                     key={idx}
-                    style={{ marginBottom: "10px", fontSize: "18px" }}
+                    style={{ marginBottom: "10px", fontSize: "36px" }}
                   >
                     {example.phonetic
                       ? createRubyText(example.text, example.phonetic)
