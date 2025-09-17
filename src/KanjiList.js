@@ -3,6 +3,8 @@ import React, { useState, useMemo } from "react";
 function KanjiList({ kanjiData }) {
   const [sortBy, setSortBy] = useState(null); // 'kun', 'on', or null
   const [sortOrder, setSortOrder] = useState("asc"); // 'asc' or 'desc'
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 400;
 
   // Hàm xử lý sắp xếp
   const handleSort = (column) => {
@@ -44,6 +46,58 @@ function KanjiList({ kanjiData }) {
 
     return sorted;
   }, [kanjiData, sortBy, sortOrder]);
+
+  // Tính toán phân trang
+  const totalPages = Math.ceil(sortedKanjiData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPageData = sortedKanjiData.slice(startIndex, endIndex);
+
+  // Reset về trang 1 khi thay đổi sắp xếp
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [sortBy, sortOrder]);
+
+  // Hàm chuyển trang
+  const goToPage = (page) => {
+    setCurrentPage(page);
+  };
+
+  // Hàm tạo số trang hiển thị
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 10;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      if (currentPage <= 6) {
+        for (let i = 1; i <= 8; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push("...");
+        pageNumbers.push(totalPages);
+      } else if (currentPage >= totalPages - 5) {
+        pageNumbers.push(1);
+        pageNumbers.push("...");
+        for (let i = totalPages - 7; i <= totalPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        pageNumbers.push(1);
+        pageNumbers.push("...");
+        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push("...");
+        pageNumbers.push(totalPages);
+      }
+    }
+
+    return pageNumbers;
+  };
 
   // Hàm tạo biểu tượng sắp xếp
   const getSortIcon = (column) => {
@@ -190,6 +244,89 @@ function KanjiList({ kanjiData }) {
         </div>
       )}
 
+      {/* Thông tin phân trang */}
+      {kanjiData.length > 0 && (
+        <div
+          style={{
+            marginBottom: "15px",
+            padding: "10px",
+            backgroundColor: "#f9f9f9",
+            borderRadius: "5px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <div>
+            <strong>Tổng cộng:</strong> {sortedKanjiData.length} kanji |{" "}
+            <strong>Trang:</strong> {currentPage}/{totalPages} |{" "}
+            <strong>Hiển thị:</strong> {startIndex + 1}-
+            {Math.min(endIndex, sortedKanjiData.length)}
+          </div>
+          <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: currentPage === 1 ? "#e0e0e0" : "#007bff",
+                color: currentPage === 1 ? "#666" : "white",
+                border: "none",
+                borderRadius: "3px",
+                cursor: currentPage === 1 ? "not-allowed" : "pointer",
+              }}
+            >
+              ‹ Trước
+            </button>
+
+            {getPageNumbers().map((page, index) => (
+              <button
+                key={index}
+                onClick={() => typeof page === "number" && goToPage(page)}
+                disabled={page === "..."}
+                style={{
+                  padding: "5px 10px",
+                  backgroundColor:
+                    page === currentPage
+                      ? "#007bff"
+                      : page === "..."
+                      ? "transparent"
+                      : "#e0e0e0",
+                  color:
+                    page === currentPage
+                      ? "white"
+                      : page === "..."
+                      ? "#666"
+                      : "black",
+                  border: page === "..." ? "none" : "1px solid #ccc",
+                  borderRadius: "3px",
+                  cursor: page === "..." ? "default" : "pointer",
+                  minWidth: "35px",
+                }}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              style={{
+                padding: "5px 10px",
+                backgroundColor:
+                  currentPage === totalPages ? "#e0e0e0" : "#007bff",
+                color: currentPage === totalPages ? "#666" : "white",
+                border: "none",
+                borderRadius: "3px",
+                cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+              }}
+            >
+              Sau ›
+            </button>
+          </div>
+        </div>
+      )}
+
       {kanjiData.length === 0 ? (
         <p>Chưa có dữ liệu nào.</p>
       ) : (
@@ -228,7 +365,7 @@ function KanjiList({ kanjiData }) {
             </tr>
           </thead>
           <tbody>
-            {sortedKanjiData.map((item, idx) => {
+            {currentPageData.map((item, idx) => {
               const rows = [];
 
               // Hàng đầu tiên với kanji và 2 ví dụ đầu
@@ -271,6 +408,93 @@ function KanjiList({ kanjiData }) {
             })}
           </tbody>
         </table>
+      )}
+
+      {/* Phân trang dưới bảng */}
+      {kanjiData.length > 0 && totalPages > 1 && (
+        <div
+          style={{
+            marginTop: "20px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <button
+            onClick={() => goToPage(1)}
+            disabled={currentPage === 1}
+            style={{
+              padding: "8px 12px",
+              backgroundColor: currentPage === 1 ? "#e0e0e0" : "#007bff",
+              color: currentPage === 1 ? "#666" : "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: currentPage === 1 ? "not-allowed" : "pointer",
+            }}
+          >
+            ‹‹ Đầu
+          </button>
+
+          <button
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            style={{
+              padding: "8px 12px",
+              backgroundColor: currentPage === 1 ? "#e0e0e0" : "#007bff",
+              color: currentPage === 1 ? "#666" : "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: currentPage === 1 ? "not-allowed" : "pointer",
+            }}
+          >
+            ‹ Trước
+          </button>
+
+          <span
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #dee2e6",
+              borderRadius: "5px",
+              fontWeight: "bold",
+            }}
+          >
+            Trang {currentPage} / {totalPages}
+          </span>
+
+          <button
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            style={{
+              padding: "8px 12px",
+              backgroundColor:
+                currentPage === totalPages ? "#e0e0e0" : "#007bff",
+              color: currentPage === totalPages ? "#666" : "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+            }}
+          >
+            Sau ›
+          </button>
+
+          <button
+            onClick={() => goToPage(totalPages)}
+            disabled={currentPage === totalPages}
+            style={{
+              padding: "8px 12px",
+              backgroundColor:
+                currentPage === totalPages ? "#e0e0e0" : "#007bff",
+              color: currentPage === totalPages ? "#666" : "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+            }}
+          >
+            Cuối ››
+          </button>
+        </div>
       )}
     </div>
   );
