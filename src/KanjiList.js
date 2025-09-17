@@ -6,7 +6,7 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [showOnlyFirstTwoExamples, setShowOnlyFirstTwoExamples] =
     useState(false);
-  const itemsPerPage = 200;
+  const itemsPerPage = 100;
 
   // Hàm xử lý sắp xếp
   const handleSort = (column) => {

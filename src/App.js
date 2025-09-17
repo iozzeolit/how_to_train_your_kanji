@@ -345,7 +345,9 @@ function App() {
   };
 
   const deleteKanji = (kanjiToDelete) => {
-    const updatedKanjiData = kanjiData.filter(item => item.kanji !== kanjiToDelete);
+    const updatedKanjiData = kanjiData.filter(
+      (item) => item.kanji !== kanjiToDelete
+    );
     setKanjiData(updatedKanjiData);
     localStorage.setItem("kanjiData", JSON.stringify(updatedKanjiData));
   };
@@ -512,7 +514,9 @@ function App() {
         />
         <Route
           path="/kanji-list"
-          element={<KanjiList kanjiData={kanjiData} onDeleteKanji={deleteKanji} />}
+          element={
+            <KanjiList kanjiData={kanjiData} onDeleteKanji={deleteKanji} />
+          }
         />
         <Route
           path="/random-kanji"
