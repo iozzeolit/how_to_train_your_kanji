@@ -4,8 +4,8 @@ function RandomKanji({ kanjiData }) {
   const [currentKanji, setCurrentKanji] = useState(null);
   const [userAnswers, setUserAnswers] = useState({
     hanviet: "",
-    kun: "",
-    on: "",
+    kun: [],
+    on: [],
   });
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState({
@@ -71,18 +71,34 @@ function RandomKanji({ kanjiData }) {
   useEffect(() => {
     if (kanjiData.length > 0) {
       const randomIndex = Math.floor(Math.random() * kanjiData.length);
-      setCurrentKanji(kanjiData[randomIndex]);
+      const selectedKanji = kanjiData[randomIndex];
+      setCurrentKanji(selectedKanji);
       setShowResult(false);
-      setUserAnswers({ hanviet: "", kun: "", on: "" });
+      
+      // Khởi tạo userAnswers dựa trên số lượng readings
+      const kunCount = Array.isArray(selectedKanji.kun) ? selectedKanji.kun.filter(r => r.trim() !== "").length : (selectedKanji.kun && selectedKanji.kun.trim() !== "" ? 1 : 0);
+      const onCount = Array.isArray(selectedKanji.on) ? selectedKanji.on.filter(r => r.trim() !== "").length : (selectedKanji.on && selectedKanji.on.trim() !== "" ? 1 : 0);
+      
+      setUserAnswers({ 
+        hanviet: "", 
+        kun: new Array(kunCount).fill(""),
+        on: new Array(onCount).fill("")
+      });
       setIsCorrect({ hanviet: false, kun: false, on: false });
     }
   }, [kanjiData]);
 
-  const handleInputChange = (field, value) => {
-    setUserAnswers((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const handleInputChange = (field, value, index = null) => {
+    setUserAnswers((prev) => {
+      if (field === "hanviet") {
+        return { ...prev, [field]: value };
+      } else {
+        // For kun and on arrays
+        const newArray = [...prev[field]];
+        newArray[index] = value;
+        return { ...prev, [field]: newArray };
+      }
+    });
   };
 
   // Hàm kiểm tra xem reading có tồn tại không
@@ -113,19 +129,27 @@ function RandomKanji({ kanjiData }) {
     e.preventDefault();
     if (!currentKanji) return;
 
-    // Hàm kiểm tra đáp án với mảng readings
-    const checkReadingAnswer = (userAnswer, correctReadings) => {
+    // Hàm kiểm tra đáp án với mảng readings - yêu cầu tất cả readings phải đúng
+    const checkAllReadingsAnswer = (userAnswers, correctReadings) => {
       if (!correctReadings || correctReadings.length === 0) return false;
+      
       if (Array.isArray(correctReadings)) {
-        // Nếu correctReadings là mảng, kiểm tra xem userAnswer có match với bất kỳ phần tử nào không
-        return correctReadings.some(
-          (reading) => userAnswer.trim().toLowerCase() === reading.toLowerCase()
+        const validCorrectReadings = correctReadings.filter(r => r.trim() !== "");
+        const validUserAnswers = userAnswers.filter(a => a.trim() !== "");
+        
+        // Kiểm tra số lượng phải bằng nhau
+        if (validCorrectReadings.length !== validUserAnswers.length) return false;
+        
+        // Kiểm tra từng đáp án của user có trong correctReadings không
+        return validUserAnswers.every(userAnswer => 
+          validCorrectReadings.some(correctReading => 
+            userAnswer.trim().toLowerCase() === correctReading.toLowerCase()
+          )
         );
       } else {
-        // Nếu correctReadings là string (backward compatibility)
-        return (
-          userAnswer.trim().toLowerCase() === correctReadings.toLowerCase()
-        );
+        // Backward compatibility với string
+        return userAnswers.length === 1 && 
+               userAnswers[0].trim().toLowerCase() === correctReadings.toLowerCase();
       }
     };
 
@@ -167,10 +191,10 @@ function RandomKanji({ kanjiData }) {
     const results = {
       hanviet: checkHanvietAnswer(userAnswers.hanviet, currentKanji.hanviet),
       kun: hasReading(currentKanji.kun)
-        ? checkReadingAnswer(userAnswers.kun, currentKanji.kun)
+        ? checkAllReadingsAnswer(userAnswers.kun, currentKanji.kun)
         : true,
       on: hasReading(currentKanji.on)
-        ? checkReadingAnswer(userAnswers.on, currentKanji.on)
+        ? checkAllReadingsAnswer(userAnswers.on, currentKanji.on)
         : true,
     };
 
@@ -181,9 +205,19 @@ function RandomKanji({ kanjiData }) {
   const getNextKanji = () => {
     if (kanjiData.length > 0) {
       const randomIndex = Math.floor(Math.random() * kanjiData.length);
-      setCurrentKanji(kanjiData[randomIndex]);
+      const selectedKanji = kanjiData[randomIndex];
+      setCurrentKanji(selectedKanji);
       setShowResult(false);
-      setUserAnswers({ hanviet: "", kun: "", on: "" });
+      
+      // Khởi tạo userAnswers dựa trên số lượng readings
+      const kunCount = Array.isArray(selectedKanji.kun) ? selectedKanji.kun.filter(r => r.trim() !== "").length : (selectedKanji.kun && selectedKanji.kun.trim() !== "" ? 1 : 0);
+      const onCount = Array.isArray(selectedKanji.on) ? selectedKanji.on.filter(r => r.trim() !== "").length : (selectedKanji.on && selectedKanji.on.trim() !== "" ? 1 : 0);
+      
+      setUserAnswers({ 
+        hanviet: "", 
+        kun: new Array(kunCount).fill(""),
+        on: new Array(onCount).fill("")
+      });
       setIsCorrect({ hanviet: false, kun: false, on: false });
     }
   };
@@ -270,22 +304,48 @@ function RandomKanji({ kanjiData }) {
             <label style={{ display: "block", marginBottom: "5px" }}>
               {createReadingLabel("Âm Kun", currentKanji?.kun)}:
             </label>
-            <input
-              type="text"
-              value={userAnswers.kun}
-              onChange={(e) => handleInputChange("kun", e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px",
-                fontSize: "16px",
-                backgroundColor: showResult
-                  ? isCorrect.kun
-                    ? "#d4edda"
-                    : "#f8d7da"
-                  : "white",
-              }}
-              disabled={showResult}
-            />
+            {Array.isArray(currentKanji.kun) && currentKanji.kun.filter(r => r.trim() !== "").length > 1 ? (
+              // Multiple inputs for multiple kun readings
+              currentKanji.kun.filter(r => r.trim() !== "").map((reading, index) => (
+                <div key={index} style={{ marginBottom: "8px" }}>
+                  <input
+                    type="text"
+                    value={userAnswers.kun[index] || ""}
+                    onChange={(e) => handleInputChange("kun", e.target.value, index)}
+                    placeholder={`Âm kun thứ ${index + 1}`}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      fontSize: "16px",
+                      backgroundColor: showResult
+                        ? isCorrect.kun
+                          ? "#d4edda"
+                          : "#f8d7da"
+                        : "white",
+                    }}
+                    disabled={showResult}
+                  />
+                </div>
+              ))
+            ) : (
+              // Single input for single kun reading
+              <input
+                type="text"
+                value={userAnswers.kun[0] || ""}
+                onChange={(e) => handleInputChange("kun", e.target.value, 0)}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  fontSize: "16px",
+                  backgroundColor: showResult
+                    ? isCorrect.kun
+                      ? "#d4edda"
+                      : "#f8d7da"
+                    : "white",
+                }}
+                disabled={showResult}
+              />
+            )}
             {showResult && (
               <div
                 style={{
@@ -310,22 +370,48 @@ function RandomKanji({ kanjiData }) {
             <label style={{ display: "block", marginBottom: "5px" }}>
               {createReadingLabel("Âm On", currentKanji?.on)}:
             </label>
-            <input
-              type="text"
-              value={userAnswers.on}
-              onChange={(e) => handleInputChange("on", e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px",
-                fontSize: "16px",
-                backgroundColor: showResult
-                  ? isCorrect.on
-                    ? "#d4edda"
-                    : "#f8d7da"
-                  : "white",
-              }}
-              disabled={showResult}
-            />
+            {Array.isArray(currentKanji.on) && currentKanji.on.filter(r => r.trim() !== "").length > 1 ? (
+              // Multiple inputs for multiple on readings
+              currentKanji.on.filter(r => r.trim() !== "").map((reading, index) => (
+                <div key={index} style={{ marginBottom: "8px" }}>
+                  <input
+                    type="text"
+                    value={userAnswers.on[index] || ""}
+                    onChange={(e) => handleInputChange("on", e.target.value, index)}
+                    placeholder={`Âm on thứ ${index + 1}`}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      fontSize: "16px",
+                      backgroundColor: showResult
+                        ? isCorrect.on
+                          ? "#d4edda"
+                          : "#f8d7da"
+                        : "white",
+                    }}
+                    disabled={showResult}
+                  />
+                </div>
+              ))
+            ) : (
+              // Single input for single on reading
+              <input
+                type="text"
+                value={userAnswers.on[0] || ""}
+                onChange={(e) => handleInputChange("on", e.target.value, 0)}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  fontSize: "16px",
+                  backgroundColor: showResult
+                    ? isCorrect.on
+                      ? "#d4edda"
+                      : "#f8d7da"
+                    : "white",
+                }}
+                disabled={showResult}
+              />
+            )}
             {showResult && (
               <div
                 style={{
