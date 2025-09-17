@@ -18,6 +18,7 @@ function DailyLearning({ kanjiData }) {
     on: false,
   });
   const [isPlanSet, setIsPlanSet] = useState(false);
+  const [showStudyMode, setShowStudyMode] = useState(false);
 
   // Hàm kiểm tra xem ký tự có phải kanji không
   const isKanji = (char) => {
@@ -383,9 +384,48 @@ function DailyLearning({ kanjiData }) {
             marginBottom: "20px",
           }}
         >
-          <h3>
-            Ngày {currentDay} / {learningPlan.length}
-          </h3>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "10px",
+            }}
+          >
+            <h3 style={{ margin: 0 }}>
+              Ngày {currentDay} / {learningPlan.length}
+            </h3>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                onClick={() => setShowStudyMode(true)}
+                style={{
+                  padding: "8px 16px",
+                  fontSize: "14px",
+                  backgroundColor: showStudyMode ? "#007bff" : "#6c757d",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Học
+              </button>
+              <button
+                onClick={() => setShowStudyMode(false)}
+                style={{
+                  padding: "8px 16px",
+                  fontSize: "14px",
+                  backgroundColor: !showStudyMode ? "#28a745" : "#6c757d",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Bắt đầu kiểm tra
+              </button>
+            </div>
+          </div>
           <p>
             Tiến độ hôm nay: {completedToday} / {todayKanji.length} từ
           </p>
@@ -408,8 +448,187 @@ function DailyLearning({ kanjiData }) {
           </div>
         </div>
 
-        {currentKanji && (
+        {/* Chi tiết học tập cho ngày hiện tại */}
+        {showStudyMode && (
+          <div
+            style={{
+              backgroundColor: "#fff",
+              padding: "20px",
+              borderRadius: "5px",
+              marginBottom: "20px",
+              border: "1px solid #dee2e6",
+              overflowY: "auto",
+            }}
+          >
+            <h4
+              style={{ marginTop: 0, marginBottom: "15px", color: "#495057" }}
+            >
+              Chi tiết học tập - Ngày {currentDay} ({todayKanji.length} từ)
+            </h4>
+            <div style={{ display: "grid", gap: "15px" }}>
+              {todayKanji.map((kanji, index) => {
+                const isCompleted = todayProgress.includes(index);
+                return (
+                  <div
+                    key={index}
+                    style={{
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "8px",
+                      padding: "15px",
+                      backgroundColor: isCompleted ? "#e8f5e8" : "#f9f9f9",
+                      borderLeft: `4px solid ${
+                        isCompleted ? "#28a745" : "#6c757d"
+                      }`,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "15px",
+                        marginBottom: "10px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "36px",
+                          fontWeight: "bold",
+                          minWidth: "50px",
+                          textAlign: "center",
+                        }}
+                      >
+                        {kanji.kanji}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ marginBottom: "5px" }}>
+                          <strong>Hán Việt:</strong>{" "}
+                          {Array.isArray(kanji.hanviet)
+                            ? kanji.hanviet.join("、")
+                            : kanji.hanviet}
+                        </div>
+                        {hasReading(kanji.kun) && (
+                          <div style={{ marginBottom: "5px" }}>
+                            <strong>Âm Kun:</strong>{" "}
+                            {Array.isArray(kanji.kun)
+                              ? kanji.kun.join("、")
+                              : kanji.kun}
+                          </div>
+                        )}
+                        {hasReading(kanji.on) && (
+                          <div style={{ marginBottom: "5px" }}>
+                            <strong>Âm On:</strong>{" "}
+                            {Array.isArray(kanji.on)
+                              ? kanji.on.join("、")
+                              : kanji.on}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ textAlign: "center", minWidth: "80px" }}>
+                        {isCompleted ? (
+                          <span style={{ color: "#28a745", fontSize: "18px" }}>
+                            ✓ Hoàn thành
+                          </span>
+                        ) : (
+                          <span style={{ color: "#6c757d", fontSize: "14px" }}>
+                            Chưa học
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Từ ví dụ */}
+                    {kanji.example && kanji.example.length > 0 && (
+                      <div
+                        style={{
+                          borderTop: "1px solid #e0e0e0",
+                          paddingTop: "10px",
+                        }}
+                      >
+                        <strong style={{ fontSize: "14px", color: "#666" }}>
+                          Từ ví dụ:
+                        </strong>
+                        <div
+                          style={{
+                            marginTop: "8px",
+                            display: "grid",
+                            gap: "5px",
+                          }}
+                        >
+                          {kanji.example
+                            .filter(Boolean)
+                            .slice(0, 4)
+                            .map((example, idx) => (
+                              <div
+                                key={idx}
+                                style={{ fontSize: "14px", padding: "5px 0" }}
+                              >
+                                {typeof example === "string" ? (
+                                  example
+                                ) : typeof example === "object" &&
+                                  example.text ? (
+                                  <span>
+                                    {example.phonetic
+                                      ? createRubyText(
+                                          example.text,
+                                          example.phonetic
+                                        )
+                                      : example.text}
+                                  </span>
+                                ) : null}
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Thông báo khi đang ở chế độ học */}
+        {showStudyMode && (
+          <div
+            style={{
+              backgroundColor: "#e7f3ff",
+              padding: "15px",
+              borderRadius: "5px",
+              marginBottom: "20px",
+              border: "1px solid #b3d9ff",
+              textAlign: "center",
+            }}
+          >
+            <p style={{ margin: 0, color: "#0066cc", fontWeight: "500" }}>
+              📚 Bạn đang ở chế độ học. Hãy ôn tập thông tin các từ kanji ở
+              trên, sau đó nhấn <strong>"Bắt đầu kiểm tra"</strong> để bắt đầu
+              làm bài.
+            </p>
+          </div>
+        )}
+
+        {currentKanji && !showStudyMode && (
           <>
+            {/* Thông báo khi đang ở chế độ kiểm tra */}
+            <div
+              style={{
+                backgroundColor: "#fff3cd",
+                padding: "10px 15px",
+                borderRadius: "5px",
+                marginBottom: "15px",
+                border: "1px solid #ffeaa7",
+                textAlign: "center",
+              }}
+            >
+              <p style={{ margin: 0, color: "#856404", fontSize: "14px" }}>
+                ✏️ <strong>Chế độ kiểm tra</strong> - Từ {currentKanjiIndex + 1}
+                /{todayKanji.length}
+                {todayProgress.includes(currentKanjiIndex)
+                  ? " (Đã hoàn thành)"
+                  : ""}
+              </p>
+            </div>
+
             <div
               style={{
                 fontSize: "72px",
