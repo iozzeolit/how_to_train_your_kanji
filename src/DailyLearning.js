@@ -871,7 +871,7 @@ function DailyLearning({ kanjiData }) {
             </form>
 
             {showResult && currentKanji.example && (
-              <ExampleWords examples={currentKanji.example} fontSize="18px" />
+              <ExampleWords examples={currentKanji.example} fontSize="36px" />
             )}
           </>
         )}
