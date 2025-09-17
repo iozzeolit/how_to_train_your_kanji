@@ -6,6 +6,8 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [showOnlyFirstTwoExamples, setShowOnlyFirstTwoExamples] =
     useState(false);
+  const [searchKeyword, setSearchKeyword] = useState(""); // Từ khóa trong input
+  const [activeSearchKeyword, setActiveSearchKeyword] = useState(""); // Từ khóa thực tế để tìm kiếm
   const itemsPerPage = 100;
 
   // Hàm xử lý sắp xếp
@@ -46,6 +48,17 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
     }
   };
 
+  // Hàm xử lý tìm kiếm
+  const handleSearch = () => {
+    setActiveSearchKeyword(searchKeyword);
+  };
+
+  // Hàm xóa tìm kiếm
+  const handleClearSearch = () => {
+    setSearchKeyword("");
+    setActiveSearchKeyword("");
+  };
+
   // Hàm chuẩn hóa tiếng Việt (bỏ dấu) để sắp xếp
   const normalizeVietnamese = (str) => {
     return str
@@ -77,11 +90,74 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
     return sortValue.toLowerCase();
   };
 
-  // Dữ liệu đã được sắp xếp
-  const sortedKanjiData = useMemo(() => {
-    if (!sortBy) return kanjiData;
+  // Hàm tìm kiếm qua tất cả trường
+  const searchInAllFields = (item, keyword) => {
+    if (!keyword) return true;
 
-    const sorted = [...kanjiData].sort((a, b) => {
+    const searchTerm = normalizeVietnamese(keyword.toLowerCase());
+
+    // Tìm trong kanji
+    if (item.kanji && item.kanji.toLowerCase().includes(searchTerm)) {
+      return true;
+    }
+
+    // Tìm trong hanviet
+    if (item.hanviet) {
+      const hanvietText = Array.isArray(item.hanviet)
+        ? item.hanviet.join(" ")
+        : item.hanviet;
+      if (normalizeVietnamese(hanvietText.toLowerCase()).includes(searchTerm)) {
+        return true;
+      }
+    }
+
+    // Tìm trong kun
+    if (item.kun) {
+      const kunText = Array.isArray(item.kun) ? item.kun.join(" ") : item.kun;
+      if (kunText.toLowerCase().includes(searchTerm)) {
+        return true;
+      }
+    }
+
+    // Tìm trong on
+    if (item.on) {
+      const onText = Array.isArray(item.on) ? item.on.join(" ") : item.on;
+      if (onText.toLowerCase().includes(searchTerm)) {
+        return true;
+      }
+    }
+
+    // Tìm trong example
+    if (item.example && Array.isArray(item.example)) {
+      for (const example of item.example) {
+        if (example) {
+          let exampleText = "";
+          if (typeof example === "string") {
+            exampleText = example;
+          } else if (typeof example === "object" && example.text) {
+            exampleText = example.text;
+          }
+          if (exampleText && exampleText.toLowerCase().includes(searchTerm)) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  };
+
+  // Dữ liệu đã được lọc và sắp xếp
+  const filteredAndSortedKanjiData = useMemo(() => {
+    // Trước tiên lọc theo từ khóa tìm kiếm
+    let filtered = kanjiData.filter((item) =>
+      searchInAllFields(item, activeSearchKeyword)
+    );
+
+    // Sau đó sắp xếp nếu có
+    if (!sortBy) return filtered;
+
+    const sorted = [...filtered].sort((a, b) => {
       const valueA = getSortValue(a, sortBy);
       const valueB = getSortValue(b, sortBy);
 
@@ -91,18 +167,23 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
     });
 
     return sorted;
-  }, [kanjiData, sortBy, sortOrder]);
+  }, [kanjiData, sortBy, sortOrder, activeSearchKeyword]);
 
   // Tính toán phân trang
-  const totalPages = Math.ceil(sortedKanjiData.length / itemsPerPage);
+  const totalPages = Math.ceil(
+    filteredAndSortedKanjiData.length / itemsPerPage
+  );
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentPageData = sortedKanjiData.slice(startIndex, endIndex);
+  const currentPageData = filteredAndSortedKanjiData.slice(
+    startIndex,
+    endIndex
+  );
 
-  // Reset về trang 1 khi thay đổi sắp xếp
+  // Reset về trang 1 khi thay đổi sắp xếp hoặc tìm kiếm
   useMemo(() => {
     setCurrentPage(1);
-  }, [sortBy, sortOrder]);
+  }, [sortBy, sortOrder, activeSearchKeyword]);
 
   // Hàm chuyển trang
   const goToPage = (page) => {
@@ -259,18 +340,42 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
             >
               <strong>📊 Thống kê:</strong>
               <span style={{ color: "#28a745" }}>
-                🆕 Mới: {kanjiData.filter((k) => k.status === "new").length}
+                🆕 Mới:{" "}
+                {
+                  filteredAndSortedKanjiData.filter((k) => k.status === "new")
+                    .length
+                }
+                {activeSearchKeyword &&
+                  ` / ${kanjiData.filter((k) => k.status === "new").length}`}
               </span>
               <span style={{ color: "#ffc107" }}>
                 🔄 Cập nhật:{" "}
-                {kanjiData.filter((k) => k.status === "updated").length}
+                {
+                  filteredAndSortedKanjiData.filter(
+                    (k) => k.status === "updated"
+                  ).length
+                }
+                {activeSearchKeyword &&
+                  ` / ${
+                    kanjiData.filter((k) => k.status === "updated").length
+                  }`}
               </span>
               <span style={{ color: "#6c757d" }}>
                 ✅ Không đổi:{" "}
-                {kanjiData.filter((k) => k.status === "existing").length}
+                {
+                  filteredAndSortedKanjiData.filter(
+                    (k) => k.status === "existing"
+                  ).length
+                }
+                {activeSearchKeyword &&
+                  ` / ${
+                    kanjiData.filter((k) => k.status === "existing").length
+                  }`}
               </span>
               <span style={{ color: "#17a2b8" }}>
-                📝 Tổng: {kanjiData.length}
+                📝 {activeSearchKeyword ? "Hiển thị" : "Tổng"}:{" "}
+                {filteredAndSortedKanjiData.length}
+                {activeSearchKeyword && ` / ${kanjiData.length}`}
               </span>
             </div>
           </div>
@@ -284,73 +389,156 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
               display: "flex",
               alignItems: "center",
               gap: "15px",
+              flexWrap: "wrap",
             }}
           >
-            <span style={{ fontWeight: "bold" }}>Sắp xếp:</span>
-            <button
-              onClick={() => handleSort("hanviet")}
+            <div
               style={{
-                padding: "5px 10px",
-                backgroundColor: sortBy === "hanviet" ? "#2196F3" : "#e0e0e0",
-                color: sortBy === "hanviet" ? "white" : "black",
-                border: "none",
-                borderRadius: "3px",
-                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "15px",
+                flex: "1",
               }}
             >
-              Hán Việt {sortBy === "hanviet" ? getSortIcon("hanviet") : ""}
-            </button>
-            <button
-              onClick={() => handleSort("kun")}
-              style={{
-                padding: "5px 10px",
-                backgroundColor: sortBy === "kun" ? "#2196F3" : "#e0e0e0",
-                color: sortBy === "kun" ? "white" : "black",
-                border: "none",
-                borderRadius: "3px",
-                cursor: "pointer",
-              }}
-            >
-              Âm Kun {sortBy === "kun" ? getSortIcon("kun") : ""}
-            </button>
-            <button
-              onClick={() => handleSort("on")}
-              style={{
-                padding: "5px 10px",
-                backgroundColor: sortBy === "on" ? "#2196F3" : "#e0e0e0",
-                color: sortBy === "on" ? "white" : "black",
-                border: "none",
-                borderRadius: "3px",
-                cursor: "pointer",
-              }}
-            >
-              Âm On {sortBy === "on" ? getSortIcon("on") : ""}
-            </button>
-            {sortBy && (
+              <span style={{ fontWeight: "bold" }}>Sắp xếp:</span>
               <button
-                onClick={() => {
-                  setSortBy(null);
-                  setSortOrder("asc");
-                }}
+                onClick={() => handleSort("hanviet")}
                 style={{
                   padding: "5px 10px",
-                  backgroundColor: "#f44336",
-                  color: "white",
+                  backgroundColor: sortBy === "hanviet" ? "#2196F3" : "#e0e0e0",
+                  color: sortBy === "hanviet" ? "white" : "black",
                   border: "none",
                   borderRadius: "3px",
                   cursor: "pointer",
                 }}
               >
-                Xóa sắp xếp
+                Hán Việt {sortBy === "hanviet" ? getSortIcon("hanviet") : ""}
               </button>
-            )}
-            {sortBy && (
-              <span style={{ fontSize: "14px", color: "#666" }}>
-                Đang sắp xếp theo{" "}
-                <strong>{sortBy === "kun" ? "Âm Kun" : "Âm On"}</strong>(
-                {sortOrder === "asc" ? "A-Z" : "Z-A"})
+              <button
+                onClick={() => handleSort("kun")}
+                style={{
+                  padding: "5px 10px",
+                  backgroundColor: sortBy === "kun" ? "#2196F3" : "#e0e0e0",
+                  color: sortBy === "kun" ? "white" : "black",
+                  border: "none",
+                  borderRadius: "3px",
+                  cursor: "pointer",
+                }}
+              >
+                Âm Kun {sortBy === "kun" ? getSortIcon("kun") : ""}
+              </button>
+              <button
+                onClick={() => handleSort("on")}
+                style={{
+                  padding: "5px 10px",
+                  backgroundColor: sortBy === "on" ? "#2196F3" : "#e0e0e0",
+                  color: sortBy === "on" ? "white" : "black",
+                  border: "none",
+                  borderRadius: "3px",
+                  cursor: "pointer",
+                }}
+              >
+                Âm On {sortBy === "on" ? getSortIcon("on") : ""}
+              </button>
+              {sortBy && (
+                <button
+                  onClick={() => {
+                    setSortBy(null);
+                    setSortOrder("asc");
+                  }}
+                  style={{
+                    padding: "5px 10px",
+                    backgroundColor: "#f44336",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "3px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Xóa sắp xếp
+                </button>
+              )}
+              {sortBy && (
+                <span style={{ fontSize: "14px", color: "#666" }}>
+                  Đang sắp xếp theo{" "}
+                  <strong>
+                    {sortBy === "hanviet"
+                      ? "Hán Việt"
+                      : sortBy === "kun"
+                      ? "Âm Kun"
+                      : "Âm On"}
+                  </strong>{" "}
+                  ({sortOrder === "asc" ? "A-Z" : "Z-A"})
+                </span>
+              )}
+            </div>
+
+            {/* Thanh tìm kiếm */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                minWidth: "350px",
+              }}
+            >
+              <span style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                🔍 Tìm kiếm:
               </span>
-            )}
+              <input
+                type="text"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                placeholder="Nhập từ khóa tìm kiếm..."
+                style={{
+                  padding: "6px 12px",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  flex: "1",
+                  outline: "none",
+                  transition: "border-color 0.3s",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "#2196F3")}
+                onBlur={(e) => (e.target.style.borderColor = "#ccc")}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+              />
+              <button
+                onClick={handleSearch}
+                style={{
+                  padding: "6px 12px",
+                  backgroundColor: "#28a745",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "3px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  whiteSpace: "nowrap",
+                  fontWeight: "bold",
+                }}
+                title="Thực hiện tìm kiếm"
+              >
+                🔍 Tìm
+              </button>
+              {activeSearchKeyword && (
+                <button
+                  onClick={handleClearSearch}
+                  style={{
+                    padding: "6px 10px",
+                    backgroundColor: "#dc3545",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "3px",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    whiteSpace: "nowrap",
+                  }}
+                  title="Xóa tìm kiếm"
+                >
+                  ✕ Xóa
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Checkbox hiển thị ví dụ */}
@@ -398,10 +586,10 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
           }}
         >
           <div>
-            <strong>Tổng cộng:</strong> {sortedKanjiData.length} kanji |{" "}
-            <strong>Trang:</strong> {currentPage}/{totalPages} |{" "}
+            <strong>Tổng cộng:</strong> {filteredAndSortedKanjiData.length}{" "}
+            kanji | <strong>Trang:</strong> {currentPage}/{totalPages} |{" "}
             <strong>Hiển thị:</strong> {startIndex + 1}-
-            {Math.min(endIndex, sortedKanjiData.length)}
+            {Math.min(endIndex, filteredAndSortedKanjiData.length)}
           </div>
           <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
             <button
