@@ -69,31 +69,6 @@ function App() {
     const onChanged = !arraysEqual(oldKanji.on, newKanji.on);
     const exampleChanged = !examplesEqual(oldKanji.example, newKanji.example);
 
-    // Debug logging - chỉ log khi có thay đổi
-    if (hanvietChanged || kunChanged || onChanged || exampleChanged) {
-      console.log(`Kanji ${newKanji.kanji} có thay đổi:`, {
-        hanviet: hanvietChanged
-          ? { old: oldKanji.hanviet, new: newKanji.hanviet }
-          : "không đổi",
-        kun: kunChanged
-          ? { old: oldKanji.kun, new: newKanji.kun }
-          : "không đổi",
-        on: onChanged ? { old: oldKanji.on, new: newKanji.on } : "không đổi",
-        example: exampleChanged
-          ? {
-              oldCount: oldKanji.example?.length,
-              newCount: newKanji.example?.length,
-              oldValid: oldKanji.example?.filter(
-                (e) => e && e.text && e.text.trim() !== ""
-              ).length,
-              newValid: newKanji.example?.filter(
-                (e) => e && e.text && e.text.trim() !== ""
-              ).length,
-            }
-          : "không đổi",
-      });
-    }
-
     if (hanvietChanged || kunChanged || onChanged || exampleChanged) {
       return "updated";
     }
