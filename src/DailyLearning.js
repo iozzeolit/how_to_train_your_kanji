@@ -713,7 +713,7 @@ function DailyLearning({ kanjiData }) {
                         }}
                       >
                         <ExampleWords
-                          examples={kanji.example.slice(0, 4)}
+                          examples={kanji.example}
                           title="Từ ví dụ"
                           fontSize="36px"
                         />
