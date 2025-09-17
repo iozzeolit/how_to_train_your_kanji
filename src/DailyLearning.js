@@ -61,7 +61,7 @@ function DailyLearning({ kanjiData }) {
         result.push(
           <ruby key={i}>
             {char}
-            <rt style={{ fontSize: "12px", color: "#666" }}>{rubyPhonetic}</rt>
+            <rt style={{ fontSize: "24px", color: "#666" }}>{rubyPhonetic}</rt>
           </ruby>
         );
       } else {
@@ -491,7 +491,7 @@ function DailyLearning({ kanjiData }) {
                     >
                       <div
                         style={{
-                          fontSize: "36px",
+                          fontSize: "60px",
                           fontWeight: "bold",
                           minWidth: "50px",
                           textAlign: "center",
@@ -500,14 +500,16 @@ function DailyLearning({ kanjiData }) {
                         {kanji.kanji}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ marginBottom: "5px" }}>
+                        <div style={{ marginBottom: "5px", fontSize: "24px" }}>
                           <strong>Hán Việt:</strong>{" "}
                           {Array.isArray(kanji.hanviet)
                             ? kanji.hanviet.join("、")
                             : kanji.hanviet}
                         </div>
                         {hasReading(kanji.kun) && (
-                          <div style={{ marginBottom: "5px" }}>
+                          <div
+                            style={{ marginBottom: "5px", fontSize: "24px" }}
+                          >
                             <strong>Âm Kun:</strong>{" "}
                             {Array.isArray(kanji.kun)
                               ? kanji.kun.join("、")
@@ -515,7 +517,9 @@ function DailyLearning({ kanjiData }) {
                           </div>
                         )}
                         {hasReading(kanji.on) && (
-                          <div style={{ marginBottom: "5px" }}>
+                          <div
+                            style={{ marginBottom: "5px", fontSize: "24px" }}
+                          >
                             <strong>Âm On:</strong>{" "}
                             {Array.isArray(kanji.on)
                               ? kanji.on.join("、")
@@ -544,7 +548,7 @@ function DailyLearning({ kanjiData }) {
                           paddingTop: "10px",
                         }}
                       >
-                        <strong style={{ fontSize: "14px", color: "#666" }}>
+                        <strong style={{ fontSize: "24px", color: "#666" }}>
                           Từ ví dụ:
                         </strong>
                         <div
@@ -560,7 +564,7 @@ function DailyLearning({ kanjiData }) {
                             .map((example, idx) => (
                               <div
                                 key={idx}
-                                style={{ fontSize: "14px", padding: "5px 0" }}
+                                style={{ fontSize: "36px", padding: "5px 0" }}
                               >
                                 {typeof example === "string" ? (
                                   example

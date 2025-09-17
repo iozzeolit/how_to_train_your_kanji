@@ -69,12 +69,8 @@ function RandomKanji({ kanjiData }) {
 
   // Chọn kanji ngẫu nhiên khi component load hoặc khi data thay đổi
   useEffect(() => {
-    console.log("KanjiData length:", kanjiData.length);
-    console.log("KanjiData:", kanjiData);
     if (kanjiData.length > 0) {
       const randomIndex = Math.floor(Math.random() * kanjiData.length);
-      console.log("Random index:", randomIndex);
-      console.log("Selected kanji:", kanjiData[randomIndex]);
       setCurrentKanji(kanjiData[randomIndex]);
       setShowResult(false);
       setUserAnswers({ hanviet: "", kun: "", on: "" });
