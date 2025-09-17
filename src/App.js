@@ -322,6 +322,28 @@ function App() {
     }
   };
 
+  const downloadDefaultFile = async () => {
+    try {
+      const response = await fetch("/KANJI_N3.xlsx");
+      if (!response.ok) {
+        throw new Error("Không thể tải file mặc định");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "KANJI_N3.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading default file:", error);
+      alert("Lỗi khi tải file về máy: " + error.message);
+    }
+  };
+
   return (
     <Router>
       <Navbar />
@@ -331,6 +353,36 @@ function App() {
           element={
             <div className="App">
               <header className="App-header">
+                {/* Download button ở góc trên cùng bên phải */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "20px",
+                    right: "20px",
+                    zIndex: 1000,
+                  }}
+                >
+                  <button
+                    onClick={downloadDefaultFile}
+                    style={{
+                      padding: "8px 16px",
+                      fontSize: "14px",
+                      backgroundColor: "#17a2b8",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "5px",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    }}
+                    title="Tải file mẫu KANJI_N3.xlsx về máy"
+                  >
+                    📥 Tải file mặc định (KANJI_N3.xlsx)
+                  </button>
+                </div>
+
                 <div style={{ marginTop: "20px" }}>
                   <input
                     type="file"
@@ -412,8 +464,8 @@ function App() {
                             onChange={(e) => setImportMode(e.target.value)}
                             style={{ marginRight: "8px" }}
                           />
-                          <strong>🗑️ Chỉ lấy từ file mới</strong> - Xóa hết dữ
-                          liệu cũ, chỉ giữ lại từ file
+                          <strong>🗑️ Chỉ lấy dữ liệu từ file mới</strong> - Xóa
+                          hết dữ liệu cũ, chỉ giữ lại từ file
                         </label>
                       </div>
                     </div>
@@ -430,7 +482,7 @@ function App() {
                         cursor: "pointer",
                       }}
                     >
-                      Tải file mặc định (KANJI_N3.xlsx)
+                      Upload file mặc định (KANJI_N3.xlsx)
                     </button>
                     <button
                       onClick={() => fileInputRef.current.click()}
@@ -444,7 +496,7 @@ function App() {
                         cursor: "pointer",
                       }}
                     >
-                      Upload Excel khác
+                      Upload file Excel khác
                     </button>
                   </div>
                 </div>
