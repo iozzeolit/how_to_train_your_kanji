@@ -10,7 +10,7 @@ function RandomKanji({ kanjiData }) {
     existing: true,
     updated: true,
     new: true,
-    learned: false,
+    learned: true,
   });
   const [filteredKanjiData, setFilteredKanjiData] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
