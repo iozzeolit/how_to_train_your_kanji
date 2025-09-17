@@ -18,6 +18,10 @@ function DailyLearning({ kanjiData }) {
     kun: false,
     on: false,
   });
+  const [romajiMode, setRomajiMode] = useState({
+    kun: false,
+    on: false,
+  });
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState({
     hanviet: false,
@@ -123,9 +127,120 @@ function DailyLearning({ kanjiData }) {
     const currentKanji = getCurrentKanji();
     if (!currentKanji) return;
 
+    // Hàm chuyển đổi hiragana sang romaji
+    const hiraganaToRomaji = (hiragana) => {
+      const map = {
+        あ: "a",
+        い: "i",
+        う: "u",
+        え: "e",
+        お: "o",
+        か: "ka",
+        き: "ki",
+        く: "ku",
+        け: "ke",
+        こ: "ko",
+        が: "ga",
+        ぎ: "gi",
+        ぐ: "gu",
+        げ: "ge",
+        ご: "go",
+        さ: "sa",
+        し: "shi",
+        す: "su",
+        せ: "se",
+        そ: "so",
+        ざ: "za",
+        じ: "ji",
+        ず: "zu",
+        ぜ: "ze",
+        ぞ: "zo",
+        た: "ta",
+        ち: "chi",
+        つ: "tsu",
+        て: "te",
+        と: "to",
+        だ: "da",
+        ぢ: "di",
+        づ: "du",
+        で: "de",
+        ど: "do",
+        な: "na",
+        に: "ni",
+        ぬ: "nu",
+        ね: "ne",
+        の: "no",
+        は: "ha",
+        ひ: "hi",
+        ふ: "fu",
+        へ: "he",
+        ほ: "ho",
+        ば: "ba",
+        び: "bi",
+        ぶ: "bu",
+        べ: "be",
+        ぼ: "bo",
+        ぱ: "pa",
+        ぴ: "pi",
+        ぷ: "pu",
+        ぺ: "pe",
+        ぽ: "po",
+        ま: "ma",
+        み: "mi",
+        む: "mu",
+        め: "me",
+        も: "mo",
+        や: "ya",
+        ゆ: "yu",
+        よ: "yo",
+        ら: "ra",
+        り: "ri",
+        る: "ru",
+        れ: "re",
+        ろ: "ro",
+        わ: "wa",
+        ゐ: "wi",
+        ゑ: "we",
+        を: "wo",
+        ん: "n",
+        ゃ: "ya",
+        ゅ: "yu",
+        ょ: "yo",
+        っ: "tsu",
+        ー: "-",
+        "・": ".",
+      };
+
+      return hiragana
+        .split("")
+        .map((char) => map[char] || char)
+        .join("");
+    };
+
+    // Hàm kiểm tra xem input có khớp với correct reading không (hỗ trợ romaji)
+    const isReadingMatch = (userInput, correctReading, isRomajiMode) => {
+      const normalizedUser = userInput.trim().toLowerCase();
+      const normalizedCorrect = correctReading.trim().toLowerCase();
+
+      if (isRomajiMode) {
+        // Chuyển đổi correct reading (hiragana) sang romaji để so sánh
+        const romajiCorrect = hiraganaToRomaji(normalizedCorrect);
+        return normalizedUser === romajiCorrect;
+      } else {
+        // So sánh trực tiếp (hiragana)
+        return normalizedUser === normalizedCorrect;
+      }
+    };
+
     // Hàm kiểm tra đáp án với mảng readings - yêu cầu tất cả readings phải đúng
-    const checkAllReadingsAnswer = (userAnswers, correctReadings) => {
+    const checkAllReadingsAnswer = (
+      userAnswers,
+      correctReadings,
+      fieldType
+    ) => {
       if (!correctReadings || correctReadings.length === 0) return false;
+
+      const isRomajiMode = romajiMode[fieldType] || false;
 
       if (Array.isArray(correctReadings)) {
         const validCorrectReadings = correctReadings.filter(
@@ -137,18 +252,17 @@ function DailyLearning({ kanjiData }) {
         if (validCorrectReadings.length !== validUserAnswers.length)
           return false;
 
-        // Kiểm tra từng đáp án của user có trong correctReadings không
+        // Kiểm tra từng đáp án của user có trong correctReadings không (hỗ trợ romaji)
         return validUserAnswers.every((userAnswer) =>
-          validCorrectReadings.some(
-            (correctReading) =>
-              userAnswer.trim().toLowerCase() === correctReading.toLowerCase()
+          validCorrectReadings.some((correctReading) =>
+            isReadingMatch(userAnswer, correctReading, isRomajiMode)
           )
         );
       } else {
-        // Backward compatibility với string
+        // Backward compatibility với string (hỗ trợ romaji)
         return (
           userAnswers.length === 1 &&
-          userAnswers[0].trim().toLowerCase() === correctReadings.toLowerCase()
+          isReadingMatch(userAnswers[0], correctReadings, isRomajiMode)
         );
       }
     };
@@ -195,12 +309,12 @@ function DailyLearning({ kanjiData }) {
       kun:
         skipFields.kun ||
         (hasReading(currentKanji.kun)
-          ? checkAllReadingsAnswer(userAnswers.kun, currentKanji.kun)
+          ? checkAllReadingsAnswer(userAnswers.kun, currentKanji.kun, "kun")
           : true),
       on:
         skipFields.on ||
         (hasReading(currentKanji.on)
-          ? checkAllReadingsAnswer(userAnswers.on, currentKanji.on)
+          ? checkAllReadingsAnswer(userAnswers.on, currentKanji.on, "on")
           : true),
     };
 
@@ -271,6 +385,7 @@ function DailyLearning({ kanjiData }) {
     }
 
     setSkipFields({ hanviet: false, kun: false, on: false });
+    setRomajiMode({ kun: false, on: false });
     setShowResult(false);
     setIsCorrect({ hanviet: false, kun: false, on: false });
   };
@@ -293,6 +408,13 @@ function DailyLearning({ kanjiData }) {
     setSkipFields((prev) => ({
       ...prev,
       [field]: isSkipped,
+    }));
+  };
+
+  const handleRomajiModeChange = (field, isRomaji) => {
+    setRomajiMode((prev) => ({
+      ...prev,
+      [field]: isRomaji,
     }));
   };
 
@@ -687,10 +809,12 @@ function DailyLearning({ kanjiData }) {
               currentKanji={currentKanji}
               userAnswers={userAnswers}
               skipFields={skipFields}
+              romajiMode={romajiMode}
               showResult={showResult}
               isCorrect={isCorrect}
               onInputChange={handleInputChange}
               onSkipFieldChange={handleSkipFieldChange}
+              onRomajiModeChange={handleRomajiModeChange}
               onSubmit={handleSubmit}
               onNext={nextKanji}
               nextButtonText="Từ tiếp theo"

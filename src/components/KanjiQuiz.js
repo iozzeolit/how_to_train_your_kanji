@@ -13,7 +13,114 @@ function KanjiQuiz({
   additionalInfo = null, // For displaying extra info like progress
   skipFields = {}, // Object with hanviet, kun, on boolean flags
   onSkipFieldChange = () => {}, // Callback for skip field changes
+  romajiMode = {}, // Object with kun, on boolean flags for romaji mode
+  onRomajiModeChange = () => {}, // Callback for romaji mode changes
 }) {
+  // Hàm chuyển đổi hiragana sang romaji
+  const hiraganaToRomaji = (hiragana) => {
+    const map = {
+      あ: "a",
+      い: "i",
+      う: "u",
+      え: "e",
+      お: "o",
+      か: "ka",
+      き: "ki",
+      く: "ku",
+      け: "ke",
+      こ: "ko",
+      が: "ga",
+      ぎ: "gi",
+      ぐ: "gu",
+      げ: "ge",
+      ご: "go",
+      さ: "sa",
+      し: "shi",
+      す: "su",
+      せ: "se",
+      そ: "so",
+      ざ: "za",
+      じ: "ji",
+      ず: "zu",
+      ぜ: "ze",
+      ぞ: "zo",
+      た: "ta",
+      ち: "chi",
+      つ: "tsu",
+      て: "te",
+      と: "to",
+      だ: "da",
+      ぢ: "di",
+      づ: "du",
+      で: "de",
+      ど: "do",
+      な: "na",
+      に: "ni",
+      ぬ: "nu",
+      ね: "ne",
+      の: "no",
+      は: "ha",
+      ひ: "hi",
+      ふ: "fu",
+      へ: "he",
+      ほ: "ho",
+      ば: "ba",
+      び: "bi",
+      ぶ: "bu",
+      べ: "be",
+      ぼ: "bo",
+      ぱ: "pa",
+      ぴ: "pi",
+      ぷ: "pu",
+      ぺ: "pe",
+      ぽ: "po",
+      ま: "ma",
+      み: "mi",
+      む: "mu",
+      め: "me",
+      も: "mo",
+      や: "ya",
+      ゆ: "yu",
+      よ: "yo",
+      ら: "ra",
+      り: "ri",
+      る: "ru",
+      れ: "re",
+      ろ: "ro",
+      わ: "wa",
+      ゐ: "wi",
+      ゑ: "we",
+      を: "wo",
+      ん: "n",
+      ゃ: "ya",
+      ゅ: "yu",
+      ょ: "yo",
+      っ: "tsu",
+      ー: "-",
+      "・": ".",
+    };
+
+    return hiragana
+      .split("")
+      .map((char) => map[char] || char)
+      .join("");
+  };
+
+  // Hàm kiểm tra xem input có khớp với correct reading không (hỗ trợ romaji)
+  const isReadingMatch = (userInput, correctReading, isRomajiMode) => {
+    const normalizedUser = userInput.trim().toLowerCase();
+    const normalizedCorrect = correctReading.trim().toLowerCase();
+
+    if (isRomajiMode) {
+      // Chuyển đổi correct reading (hiragana) sang romaji để so sánh
+      const romajiCorrect = hiraganaToRomaji(normalizedCorrect);
+      return normalizedUser === romajiCorrect;
+    } else {
+      // So sánh trực tiếp (hiragana)
+      return normalizedUser === normalizedCorrect;
+    }
+  };
+
   // Hàm tạo biểu tượng trạng thái kanji
   const getStatusIcon = (status) => {
     switch (status) {
@@ -198,25 +305,48 @@ function KanjiQuiz({
               <label style={{ margin: 0 }}>
                 {createReadingLabel("Âm Kun", currentKanji?.kun)}:
               </label>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                }}
+              <div
+                style={{ display: "flex", gap: "15px", alignItems: "center" }}
               >
-                <input
-                  type="checkbox"
-                  checked={skipFields.kun || false}
-                  onChange={(e) => onSkipFieldChange("kun", e.target.checked)}
-                  style={{ marginRight: "5px" }}
-                  disabled={showResult}
-                />
-                <span style={{ color: "#6c757d" }}>
-                  Không kiểm tra trường này
-                </span>
-              </label>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={romajiMode.kun || false}
+                    onChange={(e) =>
+                      onRomajiModeChange("kun", e.target.checked)
+                    }
+                    style={{ marginRight: "5px", cursor: "pointer" }}
+                    disabled={showResult}
+                  />
+                  <span style={{ color: "#007bff" }}>Romaji</span>
+                </label>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={skipFields.kun || false}
+                    onChange={(e) => onSkipFieldChange("kun", e.target.checked)}
+                    style={{ marginRight: "5px" }}
+                    disabled={showResult}
+                  />
+                  <span style={{ color: "#6c757d" }}>
+                    Không kiểm tra trường này
+                  </span>
+                </label>
+              </div>
             </div>
             {Array.isArray(currentKanji.kun) &&
             currentKanji.kun.filter((r) => r.trim() !== "").length > 1 ? (
@@ -239,7 +369,9 @@ function KanjiQuiz({
                       onChange={(e) =>
                         onInputChange("kun", e.target.value, index)
                       }
-                      placeholder={`Âm kun thứ ${index + 1}`}
+                      placeholder={`Âm kun thứ ${index + 1}${
+                        romajiMode.kun ? " (Romaji)" : " (Hiragana)"
+                      }`}
                       style={{
                         flex: "1 1 0",
                         minWidth: "150px",
@@ -283,6 +415,9 @@ function KanjiQuiz({
                     : "white",
                   color: skipFields.kun ? "#666" : "black",
                 }}
+                placeholder={`Âm kun${
+                  romajiMode.kun ? " (Romaji)" : " (Hiragana)"
+                }`}
                 disabled={showResult || skipFields.kun}
               />
             )}
@@ -299,7 +434,15 @@ function KanjiQuiz({
                   ? "✓ Đúng!"
                   : `✗ Sai! Đáp án: ${
                       Array.isArray(currentKanji.kun)
-                        ? currentKanji.kun.join("、")
+                        ? currentKanji.kun
+                            .map((reading) =>
+                              romajiMode.kun
+                                ? hiraganaToRomaji(reading)
+                                : reading
+                            )
+                            .join("、")
+                        : romajiMode.kun
+                        ? hiraganaToRomaji(currentKanji.kun)
                         : currentKanji.kun
                     }`}
               </div>
@@ -322,25 +465,46 @@ function KanjiQuiz({
               <label style={{ margin: 0 }}>
                 {createReadingLabel("Âm On", currentKanji?.on)}:
               </label>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                }}
+              <div
+                style={{ display: "flex", gap: "15px", alignItems: "center" }}
               >
-                <input
-                  type="checkbox"
-                  checked={skipFields.on || false}
-                  onChange={(e) => onSkipFieldChange("on", e.target.checked)}
-                  style={{ marginRight: "5px" }}
-                  disabled={showResult}
-                />
-                <span style={{ color: "#6c757d" }}>
-                  Không kiểm tra trường này
-                </span>
-              </label>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={romajiMode.on || false}
+                    onChange={(e) => onRomajiModeChange("on", e.target.checked)}
+                    style={{ marginRight: "5px", cursor: "pointer" }}
+                    disabled={showResult}
+                  />
+                  <span style={{ color: "#007bff" }}>Romaji</span>
+                </label>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={skipFields.on || false}
+                    onChange={(e) => onSkipFieldChange("on", e.target.checked)}
+                    style={{ marginRight: "5px" }}
+                    disabled={showResult}
+                  />
+                  <span style={{ color: "#6c757d" }}>
+                    Không kiểm tra trường này
+                  </span>
+                </label>
+              </div>
             </div>
             {Array.isArray(currentKanji.on) &&
             currentKanji.on.filter((r) => r.trim() !== "").length > 1 ? (
@@ -363,7 +527,9 @@ function KanjiQuiz({
                       onChange={(e) =>
                         onInputChange("on", e.target.value, index)
                       }
-                      placeholder={`Âm on thứ ${index + 1}`}
+                      placeholder={`Âm on thứ ${index + 1}${
+                        romajiMode.on ? " (Romaji)" : " (Hiragana)"
+                      }`}
                       style={{
                         flex: "1 1 0",
                         minWidth: "150px",
@@ -407,6 +573,9 @@ function KanjiQuiz({
                     : "white",
                   color: skipFields.on ? "#666" : "black",
                 }}
+                placeholder={`Âm on${
+                  romajiMode.on ? " (Romaji)" : " (Hiragana)"
+                }`}
                 disabled={showResult || skipFields.on}
               />
             )}
@@ -423,7 +592,15 @@ function KanjiQuiz({
                   ? "✓ Đúng!"
                   : `✗ Sai! Đáp án: ${
                       Array.isArray(currentKanji.on)
-                        ? currentKanji.on.join("、")
+                        ? currentKanji.on
+                            .map((reading) =>
+                              romajiMode.on
+                                ? hiraganaToRomaji(reading)
+                                : reading
+                            )
+                            .join("、")
+                        : romajiMode.on
+                        ? hiraganaToRomaji(currentKanji.on)
                         : currentKanji.on
                     }`}
               </div>
