@@ -99,6 +99,20 @@ function KanjiList({ kanjiData }) {
     return pageNumbers;
   };
 
+  // Hàm tạo biểu tượng trạng thái kanji
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "new":
+        return { icon: "🆕", color: "#28a745", text: "Mới" };
+      case "updated":
+        return { icon: "🔄", color: "#ffc107", text: "Cập nhật" };
+      case "existing":
+        return { icon: "✅", color: "#6c757d", text: "Không đổi" };
+      default:
+        return { icon: "", color: "#6c757d", text: "" };
+    }
+  };
+
   // Hàm tạo biểu tượng sắp xếp
   const getSortIcon = (column) => {
     if (sortBy !== column) return " ↕️";
@@ -176,72 +190,110 @@ function KanjiList({ kanjiData }) {
     <div style={{ padding: "20px" }}>
       <h2>Danh sách các chữ đã đọc</h2>
 
-      {/* Khu vực điều khiển sắp xếp */}
+      {/* Khu vực điều khiển sắp xếp và thống kê */}
       {kanjiData.length > 0 && (
-        <div
-          style={{
-            marginBottom: "15px",
-            padding: "10px",
-            backgroundColor: "#f5f5f5",
-            borderRadius: "5px",
-            display: "flex",
-            alignItems: "center",
-            gap: "15px",
-          }}
-        >
-          <span style={{ fontWeight: "bold" }}>Sắp xếp:</span>
-          <button
-            onClick={() => handleSort("kun")}
+        <>
+          {/* Thống kê trạng thái kanji */}
+          <div
             style={{
-              padding: "5px 10px",
-              backgroundColor: sortBy === "kun" ? "#2196F3" : "#e0e0e0",
-              color: sortBy === "kun" ? "white" : "black",
-              border: "none",
-              borderRadius: "3px",
-              cursor: "pointer",
+              marginBottom: "10px",
+              padding: "10px",
+              backgroundColor: "#e9f7ef",
+              borderRadius: "5px",
+              border: "1px solid #c3e6cb",
             }}
           >
-            Âm Kun {sortBy === "kun" ? getSortIcon("kun") : ""}
-          </button>
-          <button
-            onClick={() => handleSort("on")}
-            style={{
-              padding: "5px 10px",
-              backgroundColor: sortBy === "on" ? "#2196F3" : "#e0e0e0",
-              color: sortBy === "on" ? "white" : "black",
-              border: "none",
-              borderRadius: "3px",
-              cursor: "pointer",
-            }}
-          >
-            Âm On {sortBy === "on" ? getSortIcon("on") : ""}
-          </button>
-          {sortBy && (
-            <button
-              onClick={() => {
-                setSortBy(null);
-                setSortOrder("asc");
+            <div
+              style={{
+                display: "flex",
+                gap: "20px",
+                alignItems: "center",
+                flexWrap: "wrap",
               }}
+            >
+              <strong>📊 Thống kê:</strong>
+              <span style={{ color: "#28a745" }}>
+                🆕 Mới: {kanjiData.filter((k) => k.status === "new").length}
+              </span>
+              <span style={{ color: "#ffc107" }}>
+                🔄 Cập nhật:{" "}
+                {kanjiData.filter((k) => k.status === "updated").length}
+              </span>
+              <span style={{ color: "#6c757d" }}>
+                ✅ Không đổi:{" "}
+                {kanjiData.filter((k) => k.status === "existing").length}
+              </span>
+              <span style={{ color: "#17a2b8" }}>
+                📝 Tổng: {kanjiData.length}
+              </span>
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginBottom: "15px",
+              padding: "10px",
+              backgroundColor: "#f5f5f5",
+              borderRadius: "5px",
+              display: "flex",
+              alignItems: "center",
+              gap: "15px",
+            }}
+          >
+            <span style={{ fontWeight: "bold" }}>Sắp xếp:</span>
+            <button
+              onClick={() => handleSort("kun")}
               style={{
                 padding: "5px 10px",
-                backgroundColor: "#f44336",
-                color: "white",
+                backgroundColor: sortBy === "kun" ? "#2196F3" : "#e0e0e0",
+                color: sortBy === "kun" ? "white" : "black",
                 border: "none",
                 borderRadius: "3px",
                 cursor: "pointer",
               }}
             >
-              Xóa sắp xếp
+              Âm Kun {sortBy === "kun" ? getSortIcon("kun") : ""}
             </button>
-          )}
-          {sortBy && (
-            <span style={{ fontSize: "14px", color: "#666" }}>
-              Đang sắp xếp theo{" "}
-              <strong>{sortBy === "kun" ? "Âm Kun" : "Âm On"}</strong>(
-              {sortOrder === "asc" ? "A-Z" : "Z-A"})
-            </span>
-          )}
-        </div>
+            <button
+              onClick={() => handleSort("on")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: sortBy === "on" ? "#2196F3" : "#e0e0e0",
+                color: sortBy === "on" ? "white" : "black",
+                border: "none",
+                borderRadius: "3px",
+                cursor: "pointer",
+              }}
+            >
+              Âm On {sortBy === "on" ? getSortIcon("on") : ""}
+            </button>
+            {sortBy && (
+              <button
+                onClick={() => {
+                  setSortBy(null);
+                  setSortOrder("asc");
+                }}
+                style={{
+                  padding: "5px 10px",
+                  backgroundColor: "#f44336",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "3px",
+                  cursor: "pointer",
+                }}
+              >
+                Xóa sắp xếp
+              </button>
+            )}
+            {sortBy && (
+              <span style={{ fontSize: "14px", color: "#666" }}>
+                Đang sắp xếp theo{" "}
+                <strong>{sortBy === "kun" ? "Âm Kun" : "Âm On"}</strong>(
+                {sortOrder === "asc" ? "A-Z" : "Z-A"})
+              </span>
+            )}
+          </div>
+        </>
       )}
 
       {/* Thông tin phân trang */}
@@ -337,6 +389,7 @@ function KanjiList({ kanjiData }) {
         >
           <thead>
             <tr>
+              <th>Trạng thái</th>
               <th>Kanji</th>
               <th>Hán Việt</th>
               <th
@@ -371,7 +424,43 @@ function KanjiList({ kanjiData }) {
               // Hàng đầu tiên với kanji và 2 ví dụ đầu
               rows.push(
                 <tr key={`${idx}-main`}>
-                  <td>{item.kanji}</td>
+                  <td style={{ textAlign: "center", minWidth: "80px" }}>
+                    {item.status && (
+                      <div
+                        style={{
+                          display: "inline-block",
+                          padding: "2px 6px",
+                          borderRadius: "12px",
+                          fontSize: "11px",
+                          fontWeight: "bold",
+                          backgroundColor:
+                            getStatusIcon(item.status).color + "20",
+                          color: getStatusIcon(item.status).color,
+                          border: `1px solid ${
+                            getStatusIcon(item.status).color
+                          }40`,
+                        }}
+                        title={`Kanji ${getStatusIcon(item.status).text}`}
+                      >
+                        {getStatusIcon(item.status).icon}{" "}
+                        {getStatusIcon(item.status).text}
+                      </div>
+                    )}
+                  </td>
+                  <td
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: "bold",
+                      backgroundColor:
+                        item.status === "new"
+                          ? "#e8f5e8"
+                          : item.status === "updated"
+                          ? "#fff8e1"
+                          : "transparent",
+                    }}
+                  >
+                    {item.kanji}
+                  </td>
                   <td>
                     {Array.isArray(item.hanviet)
                       ? item.hanviet.join("、")
@@ -393,6 +482,7 @@ function KanjiList({ kanjiData }) {
                 for (let i = 2; i < item.example.length; i += 2) {
                   rows.push(
                     <tr key={`${idx}-extra-${i}`}>
+                      <td></td>
                       <td></td>
                       <td></td>
                       <td></td>

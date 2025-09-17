@@ -12,6 +12,20 @@ function KanjiQuiz({
   nextButtonText = "Chữ tiếp theo",
   additionalInfo = null, // For displaying extra info like progress
 }) {
+  // Hàm tạo biểu tượng trạng thái kanji
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "new":
+        return { icon: "🆕", color: "#28a745", text: "Mới" };
+      case "updated":
+        return { icon: "🔄", color: "#ffc107", text: "Cập nhật" };
+      case "existing":
+        return { icon: "✅", color: "#6c757d", text: "Không đổi" };
+      default:
+        return { icon: "", color: "#6c757d", text: "" };
+    }
+  };
+
   // Hàm kiểm tra xem reading có tồn tại không
   const hasReading = (reading) => {
     if (!reading) return false;
@@ -58,9 +72,36 @@ function KanjiQuiz({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          position: "relative",
         }}
       >
         {currentKanji.kanji}
+        {/* Status indicator */}
+        {currentKanji.status && (
+          <div
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "10px",
+              fontSize: "16px",
+              padding: "4px 8px",
+              borderRadius: "12px",
+              backgroundColor: getStatusIcon(currentKanji.status).color + "20",
+              color: getStatusIcon(currentKanji.status).color,
+              border: `2px solid ${getStatusIcon(currentKanji.status).color}60`,
+              fontWeight: "bold",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+            title={`Kanji ${getStatusIcon(currentKanji.status).text}`}
+          >
+            {getStatusIcon(currentKanji.status).icon}
+            <span style={{ fontSize: "12px" }}>
+              {getStatusIcon(currentKanji.status).text}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Quiz form */}

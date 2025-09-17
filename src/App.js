@@ -21,6 +21,85 @@ function App() {
     }
   }, []);
 
+  // Helper functions for kanji comparison
+  const arraysEqual = (a, b) => {
+    if (!Array.isArray(a) || !Array.isArray(b)) return a === b;
+
+    // Lọc bỏ các phần tử rỗng
+    const filterValid = (arr) =>
+      arr.filter((item) => item && item.trim() !== "");
+
+    const validA = filterValid(a);
+    const validB = filterValid(b);
+
+    if (validA.length !== validB.length) return false;
+    return validA.every((val, index) => val === validB[index]);
+  };
+
+  const examplesEqual = (a, b) => {
+    if (!Array.isArray(a) || !Array.isArray(b)) return false;
+
+    // Lọc bỏ các example rỗng hoặc null
+    const filterValidExamples = (examples) => {
+      return examples.filter(
+        (example) => example && example.text && example.text.trim() !== ""
+      );
+    };
+
+    const validA = filterValidExamples(a);
+    const validB = filterValidExamples(b);
+
+    if (validA.length !== validB.length) return false;
+
+    return validA.every((example, index) => {
+      const otherExample = validB[index];
+      return (
+        example.text === otherExample.text &&
+        example.phonetic === otherExample.phonetic
+      );
+    });
+  };
+
+  const compareKanji = (oldKanji, newKanji) => {
+    if (!oldKanji) return "new";
+
+    // So sánh các thuộc tính
+    const hanvietChanged = !arraysEqual(oldKanji.hanviet, newKanji.hanviet);
+    const kunChanged = !arraysEqual(oldKanji.kun, newKanji.kun);
+    const onChanged = !arraysEqual(oldKanji.on, newKanji.on);
+    const exampleChanged = !examplesEqual(oldKanji.example, newKanji.example);
+
+    // Debug logging - chỉ log khi có thay đổi
+    if (hanvietChanged || kunChanged || onChanged || exampleChanged) {
+      console.log(`Kanji ${newKanji.kanji} có thay đổi:`, {
+        hanviet: hanvietChanged
+          ? { old: oldKanji.hanviet, new: newKanji.hanviet }
+          : "không đổi",
+        kun: kunChanged
+          ? { old: oldKanji.kun, new: newKanji.kun }
+          : "không đổi",
+        on: onChanged ? { old: oldKanji.on, new: newKanji.on } : "không đổi",
+        example: exampleChanged
+          ? {
+              oldCount: oldKanji.example?.length,
+              newCount: newKanji.example?.length,
+              oldValid: oldKanji.example?.filter(
+                (e) => e && e.text && e.text.trim() !== ""
+              ).length,
+              newValid: newKanji.example?.filter(
+                (e) => e && e.text && e.text.trim() !== ""
+              ).length,
+            }
+          : "không đổi",
+      });
+    }
+
+    if (hanvietChanged || kunChanged || onChanged || exampleChanged) {
+      return "updated";
+    }
+    return "existing";
+  };
+
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -30,6 +109,15 @@ function App() {
         const workbook = XLSX.read(data, { type: "array", cellStyles: true });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
+
+        // Lấy dữ liệu cũ từ localStorage để so sánh
+        const oldKanjiData = JSON.parse(
+          localStorage.getItem("kanjiData") || "[]"
+        );
+        const oldKanjiMap = {};
+        oldKanjiData.forEach((item) => {
+          oldKanjiMap[item.kanji] = item;
+        });
 
         // Đọc với raw data để lấy phonetic
         const range = XLSX.utils.decode_range(worksheet["!ref"]);
@@ -82,6 +170,16 @@ function App() {
             // Kiểm tra nếu có kanji (cột A không trống)
             const kanjiText = row[0].text ? String(row[0].text).trim() : "";
             if (kanjiText !== "") {
+              // Nếu có kanji trước đó chưa được kiểm tra status cuối cùng, kiểm tra bây giờ
+              if (result.length > 0) {
+                const lastKanji = result[result.length - 1];
+                if (lastKanji.needsStatusCheck) {
+                  const oldKanji = oldKanjiMap[lastKanji.kanji];
+                  lastKanji.status = compareKanji(oldKanji, lastKanji);
+                  delete lastKanji.needsStatusCheck;
+                }
+              }
+
               // Xử lý hanviet reading (cột B) - tách bằng dấu phẩy nếu có
               const hanvietText = row[1].text || "";
               const hanvietReadings =
@@ -118,7 +216,7 @@ function App() {
                   ? [onText.trim()]
                   : [];
 
-              result.push({
+              const newKanjiItem = {
                 kanji: kanjiText,
                 hanviet: hanvietReadings,
                 kun: kunReadings,
@@ -133,7 +231,10 @@ function App() {
                     phonetic: row[5].phonetic,
                   },
                 ],
-              });
+                needsStatusCheck: true, // Đánh dấu cần kiểm tra status sau khi thêm tất cả examples
+              };
+
+              result.push(newKanjiItem);
             } else {
               // Nếu không có kanji, thêm example vào kanji trước đó
               if (result.length > 0 && (row[4].text || row[5].text)) {
@@ -154,9 +255,36 @@ function App() {
             }
           }
         }
+
+        // Kiểm tra status cho kanji cuối cùng
+        if (result.length > 0) {
+          const lastKanji = result[result.length - 1];
+          if (lastKanji.needsStatusCheck) {
+            const oldKanji = oldKanjiMap[lastKanji.kanji];
+            lastKanji.status = compareKanji(oldKanji, lastKanji);
+            delete lastKanji.needsStatusCheck;
+          }
+        }
+
+        // Thống kê
+        const stats = {
+          new: result.filter((item) => item.status === "new").length,
+          updated: result.filter((item) => item.status === "updated").length,
+          existing: result.filter((item) => item.status === "existing").length,
+          total: result.length,
+        };
+
         setKanjiData(result);
         localStorage.setItem("kanjiData", JSON.stringify(result));
-        alert(`Đã đọc ${result.length} dòng dữ liệu từ file Excel!`);
+
+        // Hiển thị thống kê chi tiết
+        alert(
+          `Đã đọc ${stats.total} dòng dữ liệu từ file Excel!\n\n` +
+            `📊 Thống kê:\n` +
+            `🆕 Kanji mới: ${stats.new}\n` +
+            `🔄 Kanji cập nhật: ${stats.updated}\n` +
+            `✅ Kanji không đổi: ${stats.existing}`
+        );
       };
       reader.readAsArrayBuffer(file);
     }
