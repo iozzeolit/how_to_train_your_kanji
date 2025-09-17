@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 
 function KanjiList({ kanjiData }) {
-  const [sortBy, setSortBy] = useState(null); // 'kun', 'on', or null
+  const [sortBy, setSortBy] = useState(null); // 'hanviet', 'kun', 'on', or null
   const [sortOrder, setSortOrder] = useState("asc"); // 'asc' or 'desc'
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 400;
@@ -18,17 +18,35 @@ function KanjiList({ kanjiData }) {
     }
   };
 
+  // Hàm chuẩn hóa tiếng Việt (bỏ dấu) để sắp xếp
+  const normalizeVietnamese = (str) => {
+    return str
+      .normalize("NFD") // Tách các ký tự có dấu thành ký tự gốc + dấu
+      .replace(/[\u0300-\u036f]/g, "") // Loại bỏ các dấu
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D")
+      .toLowerCase();
+  };
+
   // Hàm lấy giá trị để sắp xếp
   const getSortValue = (item, column) => {
     const value = item[column];
     if (!value) return "";
 
+    let sortValue;
     if (Array.isArray(value)) {
       // Nếu là mảng, lấy phần tử đầu tiên để sắp xếp
-      return value.length > 0 ? value[0].toLowerCase() : "";
+      sortValue = value.length > 0 ? value[0] : "";
+    } else {
+      sortValue = value;
     }
 
-    return value.toLowerCase();
+    // Nếu sắp xếp theo Hán Việt, chuẩn hóa tiếng Việt
+    if (column === "hanviet") {
+      return normalizeVietnamese(sortValue);
+    }
+
+    return sortValue.toLowerCase();
   };
 
   // Dữ liệu đã được sắp xếp
@@ -242,6 +260,19 @@ function KanjiList({ kanjiData }) {
           >
             <span style={{ fontWeight: "bold" }}>Sắp xếp:</span>
             <button
+              onClick={() => handleSort("hanviet")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: sortBy === "hanviet" ? "#2196F3" : "#e0e0e0",
+                color: sortBy === "hanviet" ? "white" : "black",
+                border: "none",
+                borderRadius: "3px",
+                cursor: "pointer",
+              }}
+            >
+              Hán Việt {sortBy === "hanviet" ? getSortIcon("hanviet") : ""}
+            </button>
+            <button
               onClick={() => handleSort("kun")}
               style={{
                 padding: "5px 10px",
@@ -390,7 +421,17 @@ function KanjiList({ kanjiData }) {
           <thead>
             <tr>
               <th>Kanji</th>
-              <th>Hán Việt</th>
+              <th
+                style={{
+                  cursor: "pointer",
+                  backgroundColor: sortBy === "hanviet" ? "#e3f2fd" : "transparent",
+                  userSelect: "none",
+                }}
+                onClick={() => handleSort("hanviet")}
+                title="Nhấp để sắp xếp theo Hán Việt"
+              >
+                Hán Việt{getSortIcon("hanviet")}
+              </th>
               <th
                 style={{
                   cursor: "pointer",
