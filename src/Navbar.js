@@ -14,7 +14,7 @@ function Navbar() {
         to="/kanji-list"
         style={{ color: "white", marginRight: "20px", textDecoration: "none" }}
       >
-        Xem các chữ đã đọc
+        Xem các chữ có trong hệ thống
       </Link>
       <Link
         to="/random-kanji"

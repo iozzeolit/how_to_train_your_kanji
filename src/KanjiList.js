@@ -315,7 +315,7 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
   };
   return (
     <div style={{ padding: "20px" }}>
-      <h2>Danh sách các chữ đã đọc</h2>
+      <h2>Danh sách các chữ có trong hệ thống</h2>
 
       {/* Khu vực điều khiển sắp xếp và thống kê */}
       {kanjiData.length > 0 && (
@@ -518,7 +518,7 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
                 }}
                 title="Thực hiện tìm kiếm"
               >
-                🔍 Tìm
+                Tìm
               </button>
               {activeSearchKeyword && (
                 <button
