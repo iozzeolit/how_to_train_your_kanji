@@ -21,6 +21,11 @@ function RandomKanji({ kanjiData }) {
     kun: [],
     on: [],
   });
+  const [skipFields, setSkipFields] = useState({
+    hanviet: false,
+    kun: false,
+    on: false,
+  });
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState({
     hanviet: false,
@@ -84,6 +89,7 @@ function RandomKanji({ kanjiData }) {
       kun: new Array(kunCount).fill(""),
       on: new Array(onCount).fill(""),
     });
+    setSkipFields({ hanviet: false, kun: false, on: false });
     setIsCorrect({ hanviet: false, kun: false, on: false });
   };
 
@@ -113,6 +119,13 @@ function RandomKanji({ kanjiData }) {
         return { ...prev, [field]: newArray };
       }
     });
+  };
+
+  const handleSkipFieldChange = (field, isSkipped) => {
+    setSkipFields((prev) => ({
+      ...prev,
+      [field]: isSkipped,
+    }));
   };
 
   // Hàm kiểm tra xem reading có tồn tại không
@@ -194,13 +207,19 @@ function RandomKanji({ kanjiData }) {
     };
 
     const results = {
-      hanviet: checkHanvietAnswer(userAnswers.hanviet, currentKanji.hanviet),
-      kun: hasReading(currentKanji.kun)
-        ? checkAllReadingsAnswer(userAnswers.kun, currentKanji.kun)
-        : true,
-      on: hasReading(currentKanji.on)
-        ? checkAllReadingsAnswer(userAnswers.on, currentKanji.on)
-        : true,
+      hanviet:
+        skipFields.hanviet ||
+        checkHanvietAnswer(userAnswers.hanviet, currentKanji.hanviet),
+      kun:
+        skipFields.kun ||
+        (hasReading(currentKanji.kun)
+          ? checkAllReadingsAnswer(userAnswers.kun, currentKanji.kun)
+          : true),
+      on:
+        skipFields.on ||
+        (hasReading(currentKanji.on)
+          ? checkAllReadingsAnswer(userAnswers.on, currentKanji.on)
+          : true),
     };
 
     setIsCorrect(results);
@@ -236,7 +255,7 @@ function RandomKanji({ kanjiData }) {
 
     return (
       <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
-        <h2>Cấu hình học chữ ngẫu nhiên</h2>
+        <h2>Bạn muốn kiểm tra theo cách nào</h2>
 
         {/* Display mode selection */}
         <div
@@ -437,9 +456,11 @@ function RandomKanji({ kanjiData }) {
       <KanjiQuiz
         currentKanji={currentKanji}
         userAnswers={userAnswers}
+        skipFields={skipFields}
         showResult={showResult}
         isCorrect={isCorrect}
         onInputChange={handleInputChange}
+        onSkipFieldChange={handleSkipFieldChange}
         onSubmit={handleSubmit}
         onNext={getNextKanji}
       />

@@ -13,6 +13,11 @@ function DailyLearning({ kanjiData }) {
     kun: [],
     on: [],
   });
+  const [skipFields, setSkipFields] = useState({
+    hanviet: false,
+    kun: false,
+    on: false,
+  });
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState({
     hanviet: false,
@@ -184,13 +189,19 @@ function DailyLearning({ kanjiData }) {
     };
 
     const results = {
-      hanviet: checkHanvietAnswer(userAnswers.hanviet, currentKanji.hanviet),
-      kun: hasReading(currentKanji.kun)
-        ? checkAllReadingsAnswer(userAnswers.kun, currentKanji.kun)
-        : true,
-      on: hasReading(currentKanji.on)
-        ? checkAllReadingsAnswer(userAnswers.on, currentKanji.on)
-        : true,
+      hanviet:
+        skipFields.hanviet ||
+        checkHanvietAnswer(userAnswers.hanviet, currentKanji.hanviet),
+      kun:
+        skipFields.kun ||
+        (hasReading(currentKanji.kun)
+          ? checkAllReadingsAnswer(userAnswers.kun, currentKanji.kun)
+          : true),
+      on:
+        skipFields.on ||
+        (hasReading(currentKanji.on)
+          ? checkAllReadingsAnswer(userAnswers.on, currentKanji.on)
+          : true),
     };
 
     const allCorrect = results.hanviet && results.kun && results.on;
@@ -259,6 +270,7 @@ function DailyLearning({ kanjiData }) {
       setUserAnswers({ hanviet: "", kun: [], on: [] });
     }
 
+    setSkipFields({ hanviet: false, kun: false, on: false });
     setShowResult(false);
     setIsCorrect({ hanviet: false, kun: false, on: false });
   };
@@ -275,6 +287,13 @@ function DailyLearning({ kanjiData }) {
         return { ...prev, [field]: newArray };
       }
     });
+  };
+
+  const handleSkipFieldChange = (field, isSkipped) => {
+    setSkipFields((prev) => ({
+      ...prev,
+      [field]: isSkipped,
+    }));
   };
 
   // Hàm kiểm tra xem reading có tồn tại không
@@ -667,9 +686,11 @@ function DailyLearning({ kanjiData }) {
             <KanjiQuiz
               currentKanji={currentKanji}
               userAnswers={userAnswers}
+              skipFields={skipFields}
               showResult={showResult}
               isCorrect={isCorrect}
               onInputChange={handleInputChange}
+              onSkipFieldChange={handleSkipFieldChange}
               onSubmit={handleSubmit}
               onNext={nextKanji}
               nextButtonText="Từ tiếp theo"

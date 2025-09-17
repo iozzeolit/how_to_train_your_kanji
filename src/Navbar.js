@@ -20,13 +20,13 @@ function Navbar() {
         to="/random-kanji"
         style={{ color: "white", marginRight: "20px", textDecoration: "none" }}
       >
-        Học chữ ngẫu nhiên
+        Kiểm tra Kanji
       </Link>
       <Link
         to="/daily-learning"
         style={{ color: "white", textDecoration: "none" }}
       >
-        Học chữ theo ngày
+        Học Kanji theo ngày
       </Link>
     </nav>
   );

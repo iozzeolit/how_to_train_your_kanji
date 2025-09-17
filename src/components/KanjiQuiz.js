@@ -11,6 +11,8 @@ function KanjiQuiz({
   submitButtonText = "Kiểm tra",
   nextButtonText = "Chữ tiếp theo",
   additionalInfo = null, // For displaying extra info like progress
+  skipFields = {}, // Object with hanviet, kun, on boolean flags
+  onSkipFieldChange = () => {}, // Callback for skip field changes
 }) {
   // Hàm tạo biểu tượng trạng thái kanji
   const getStatusIcon = (status) => {
@@ -108,9 +110,35 @@ function KanjiQuiz({
       <form onSubmit={onSubmit}>
         {/* Hán Việt input */}
         <div style={{ marginBottom: "15px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>
-            Hán Việt:
-          </label>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "5px",
+            }}
+          >
+            <label style={{ margin: 0 }}>Hán Việt:</label>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                fontSize: "14px",
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={skipFields.hanviet || false}
+                onChange={(e) => onSkipFieldChange("hanviet", e.target.checked)}
+                style={{ marginRight: "5px" }}
+                disabled={showResult}
+              />
+              <span style={{ color: "#6c757d" }}>
+                Không kiểm tra trường này
+              </span>
+            </label>
+          </div>
           <input
             type="text"
             value={userAnswers.hanviet}
@@ -120,21 +148,28 @@ function KanjiQuiz({
               padding: "8px",
               fontSize: "16px",
               backgroundColor: showResult
-                ? isCorrect.hanviet
+                ? skipFields.hanviet || isCorrect.hanviet
                   ? "#d4edda"
                   : "#f8d7da"
+                : skipFields.hanviet
+                ? "#f8f9fa"
                 : "white",
+              opacity: skipFields.hanviet ? 0.7 : 1,
             }}
-            disabled={showResult}
+            disabled={showResult || skipFields.hanviet}
+            placeholder={skipFields.hanviet ? "Trường này được bỏ qua" : ""}
           />
           {showResult && (
             <div
               style={{
                 marginTop: "5px",
-                color: isCorrect.hanviet ? "green" : "red",
+                color:
+                  skipFields.hanviet || isCorrect.hanviet ? "green" : "red",
               }}
             >
-              {isCorrect.hanviet
+              {skipFields.hanviet
+                ? "⏭️ Đã bỏ qua trường này"
+                : isCorrect.hanviet
                 ? "✓ Đúng!"
                 : `✗ Sai! Đáp án: ${
                     Array.isArray(currentKanji.hanviet)
@@ -148,9 +183,35 @@ function KanjiQuiz({
         {/* Kun reading inputs */}
         {hasReading(currentKanji?.kun) && (
           <div style={{ marginBottom: "15px" }}>
-            <label style={{ display: "block", marginBottom: "5px" }}>
-              {createReadingLabel("Âm Kun", currentKanji?.kun)}:
-            </label>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "5px",
+                gap: "10px",
+              }}
+            >
+              <label style={{ margin: 0 }}>
+                {createReadingLabel("Âm Kun", currentKanji?.kun)}:
+              </label>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={skipFields.kun || false}
+                  onChange={(e) => onSkipFieldChange("kun", e.target.checked)}
+                  style={{ cursor: "pointer" }}
+                />
+                Skip field
+              </label>
+            </div>
             {Array.isArray(currentKanji.kun) &&
             currentKanji.kun.filter((r) => r.trim() !== "").length > 1 ? (
               // Multiple inputs for multiple kun readings
@@ -172,12 +233,15 @@ function KanjiQuiz({
                         padding: "8px",
                         fontSize: "16px",
                         backgroundColor: showResult
-                          ? isCorrect.kun
+                          ? skipFields.kun || isCorrect.kun
                             ? "#d4edda"
                             : "#f8d7da"
+                          : skipFields.kun
+                          ? "#f0f0f0"
                           : "white",
+                        color: skipFields.kun ? "#666" : "black",
                       }}
-                      disabled={showResult}
+                      disabled={showResult || skipFields.kun}
                     />
                   ))}
               </div>
@@ -192,22 +256,27 @@ function KanjiQuiz({
                   padding: "8px",
                   fontSize: "16px",
                   backgroundColor: showResult
-                    ? isCorrect.kun
+                    ? skipFields.kun || isCorrect.kun
                       ? "#d4edda"
                       : "#f8d7da"
+                    : skipFields.kun
+                    ? "#f0f0f0"
                     : "white",
+                  color: skipFields.kun ? "#666" : "black",
                 }}
-                disabled={showResult}
+                disabled={showResult || skipFields.kun}
               />
             )}
             {showResult && (
               <div
                 style={{
                   marginTop: "5px",
-                  color: isCorrect.kun ? "green" : "red",
+                  color: skipFields.kun || isCorrect.kun ? "green" : "red",
                 }}
               >
-                {isCorrect.kun
+                {skipFields.kun
+                  ? "✓ Skipped (automatically correct)"
+                  : isCorrect.kun
                   ? "✓ Đúng!"
                   : `✗ Sai! Đáp án: ${
                       Array.isArray(currentKanji.kun)
@@ -222,9 +291,35 @@ function KanjiQuiz({
         {/* On reading inputs */}
         {hasReading(currentKanji?.on) && (
           <div style={{ marginBottom: "15px" }}>
-            <label style={{ display: "block", marginBottom: "5px" }}>
-              {createReadingLabel("Âm On", currentKanji?.on)}:
-            </label>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "5px",
+                gap: "10px",
+              }}
+            >
+              <label style={{ margin: 0 }}>
+                {createReadingLabel("Âm On", currentKanji?.on)}:
+              </label>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={skipFields.on || false}
+                  onChange={(e) => onSkipFieldChange("on", e.target.checked)}
+                  style={{ cursor: "pointer" }}
+                />
+                Skip field
+              </label>
+            </div>
             {Array.isArray(currentKanji.on) &&
             currentKanji.on.filter((r) => r.trim() !== "").length > 1 ? (
               // Multiple inputs for multiple on readings
@@ -246,12 +341,15 @@ function KanjiQuiz({
                         padding: "8px",
                         fontSize: "16px",
                         backgroundColor: showResult
-                          ? isCorrect.on
+                          ? skipFields.on || isCorrect.on
                             ? "#d4edda"
                             : "#f8d7da"
+                          : skipFields.on
+                          ? "#f0f0f0"
                           : "white",
+                        color: skipFields.on ? "#666" : "black",
                       }}
-                      disabled={showResult}
+                      disabled={showResult || skipFields.on}
                     />
                   ))}
               </div>
@@ -266,22 +364,27 @@ function KanjiQuiz({
                   padding: "8px",
                   fontSize: "16px",
                   backgroundColor: showResult
-                    ? isCorrect.on
+                    ? skipFields.on || isCorrect.on
                       ? "#d4edda"
                       : "#f8d7da"
+                    : skipFields.on
+                    ? "#f0f0f0"
                     : "white",
+                  color: skipFields.on ? "#666" : "black",
                 }}
-                disabled={showResult}
+                disabled={showResult || skipFields.on}
               />
             )}
             {showResult && (
               <div
                 style={{
                   marginTop: "5px",
-                  color: isCorrect.on ? "green" : "red",
+                  color: skipFields.on || isCorrect.on ? "green" : "red",
                 }}
               >
-                {isCorrect.on
+                {skipFields.on
+                  ? "✓ Skipped (automatically correct)"
+                  : isCorrect.on
                   ? "✓ Đúng!"
                   : `✗ Sai! Đáp án: ${
                       Array.isArray(currentKanji.on)
