@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from "react";
 
-function KanjiList({ kanjiData }) {
+function KanjiList({ kanjiData, onDeleteKanji }) {
   const [sortBy, setSortBy] = useState(null); // 'hanviet', 'kun', 'on', or null
   const [sortOrder, setSortOrder] = useState("asc"); // 'asc' or 'desc'
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 400;
+  const [showOnlyFirstTwoExamples, setShowOnlyFirstTwoExamples] =
+    useState(false);
+  const itemsPerPage = 200;
 
   // Hàm xử lý sắp xếp
   const handleSort = (column) => {
@@ -15,6 +17,32 @@ function KanjiList({ kanjiData }) {
       // Nếu sắp xếp theo cột mới, mặc định là tăng dần
       setSortBy(column);
       setSortOrder("asc");
+    }
+  };
+
+  // Hàm xử lý xóa kanji
+  const handleDeleteKanji = (kanjiToDelete) => {
+    const confirmDelete = window.confirm(
+      `Bạn có chắc chắn muốn xóa chữ kanji "${kanjiToDelete.kanji}"?\n\n` +
+        `Hán Việt: ${
+          Array.isArray(kanjiToDelete.hanviet)
+            ? kanjiToDelete.hanviet.join(", ")
+            : kanjiToDelete.hanviet
+        }\n` +
+        `Âm Kun: ${
+          Array.isArray(kanjiToDelete.kun)
+            ? kanjiToDelete.kun.join(", ")
+            : kanjiToDelete.kun
+        }\n` +
+        `Âm On: ${
+          Array.isArray(kanjiToDelete.on)
+            ? kanjiToDelete.on.join(", ")
+            : kanjiToDelete.on
+        }`
+    );
+
+    if (confirmDelete && onDeleteKanji) {
+      onDeleteKanji(kanjiToDelete.kanji);
     }
   };
 
@@ -324,6 +352,35 @@ function KanjiList({ kanjiData }) {
               </span>
             )}
           </div>
+
+          {/* Checkbox hiển thị ví dụ */}
+          <div
+            style={{
+              marginBottom: "15px",
+              padding: "10px",
+              backgroundColor: "#f8f9fa",
+              borderRadius: "5px",
+              border: "1px solid #dee2e6",
+            }}
+          >
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontWeight: "500",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={showOnlyFirstTwoExamples}
+                onChange={(e) => setShowOnlyFirstTwoExamples(e.target.checked)}
+                style={{ marginRight: "8px" }}
+              />
+              📝 Chỉ hiển thị 2 từ ví dụ đầu tiên (ẩn các ví dụ bổ sung)
+            </label>
+          </div>
         </>
       )}
 
@@ -424,7 +481,8 @@ function KanjiList({ kanjiData }) {
               <th
                 style={{
                   cursor: "pointer",
-                  backgroundColor: sortBy === "hanviet" ? "#e3f2fd" : "transparent",
+                  backgroundColor:
+                    sortBy === "hanviet" ? "#e3f2fd" : "transparent",
                   userSelect: "none",
                 }}
                 onClick={() => handleSort("hanviet")}
@@ -454,7 +512,8 @@ function KanjiList({ kanjiData }) {
               >
                 Âm On{getSortIcon("on")}
               </th>
-              <th colSpan={2}>Từ ví dụ</th>{" "}
+              <th colSpan={2}>Từ ví dụ</th>
+              <th>Thao tác</th>
             </tr>
           </thead>
           <tbody>
@@ -491,11 +550,32 @@ function KanjiList({ kanjiData }) {
                   </td>
                   <td>{renderExample(item.example[0])}</td>
                   <td>{renderExample(item.example[1])}</td>
+                  <td style={{ textAlign: "center" }}>
+                    <button
+                      onClick={() => handleDeleteKanji(item)}
+                      style={{
+                        padding: "4px 8px",
+                        fontSize: "12px",
+                        backgroundColor: "#dc3545",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "3px",
+                        cursor: "pointer",
+                      }}
+                      title={`Xóa kanji "${item.kanji}"`}
+                    >
+                      🗑️ Xóa
+                    </button>
+                  </td>
                 </tr>
               );
 
-              // Nếu có nhiều hơn 2 ví dụ, thêm các hàng phụ
-              if (item.example && item.example.length > 2) {
+              // Nếu có nhiều hơn 2 ví dụ và không tick checkbox "chỉ hiển thị 2 ví dụ đầu", thêm các hàng phụ
+              if (
+                item.example &&
+                item.example.length > 2 &&
+                !showOnlyFirstTwoExamples
+              ) {
                 for (let i = 2; i < item.example.length; i += 2) {
                   rows.push(
                     <tr key={`${idx}-extra-${i}`}>
@@ -505,6 +585,7 @@ function KanjiList({ kanjiData }) {
                       <td></td>
                       <td>{renderExample(item.example[i])}</td>
                       <td>{renderExample(item.example[i + 1])}</td>
+                      <td></td>
                     </tr>
                   );
                 }
