@@ -189,6 +189,7 @@ function KanjiQuiz({
                 alignItems: "center",
                 marginBottom: "5px",
                 gap: "10px",
+                justifyContent: "space-between",
               }}
             >
               <label style={{ margin: 0 }}>
@@ -198,7 +199,6 @@ function KanjiQuiz({
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "5px",
                   fontSize: "14px",
                   cursor: "pointer",
                 }}
@@ -207,9 +207,12 @@ function KanjiQuiz({
                   type="checkbox"
                   checked={skipFields.kun || false}
                   onChange={(e) => onSkipFieldChange("kun", e.target.checked)}
-                  style={{ cursor: "pointer" }}
+                  style={{ marginRight: "5px" }}
+                  disabled={showResult}
                 />
-                Skip field
+                <span style={{ color: "#6c757d" }}>
+                  Không kiểm tra trường này
+                </span>
               </label>
             </div>
             {Array.isArray(currentKanji.kun) &&
@@ -297,6 +300,7 @@ function KanjiQuiz({
                 alignItems: "center",
                 marginBottom: "5px",
                 gap: "10px",
+                justifyContent: "space-between",
               }}
             >
               <label style={{ margin: 0 }}>
@@ -306,7 +310,6 @@ function KanjiQuiz({
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "5px",
                   fontSize: "14px",
                   cursor: "pointer",
                 }}
@@ -315,9 +318,12 @@ function KanjiQuiz({
                   type="checkbox"
                   checked={skipFields.on || false}
                   onChange={(e) => onSkipFieldChange("on", e.target.checked)}
-                  style={{ cursor: "pointer" }}
+                  style={{ marginRight: "5px" }}
+                  disabled={showResult}
                 />
-                Skip field
+                <span style={{ color: "#6c757d" }}>
+                  Không kiểm tra trường này
+                </span>
               </label>
             </div>
             {Array.isArray(currentKanji.on) &&
