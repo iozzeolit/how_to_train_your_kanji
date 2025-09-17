@@ -355,150 +355,15 @@ function App() {
   return (
     <Router>
       <Navbar />
-
-      {/* File Upload Toolbar - Below Navbar */}
-      <div
-        style={{
-          backgroundColor: "#f8f9fa",
-          padding: "15px 20px",
-          borderBottom: "1px solid #dee2e6",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-        }}
-      >
-        <input
-          type="file"
-          accept=".xlsx,.xls"
-          ref={fileInputRef}
-          style={{ display: "none" }}
-          onChange={handleFileChange}
-        />
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "20px",
-            flexWrap: "wrap",
-          }}
-        >
-          {/* Import Mode Selection */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "15px",
-              backgroundColor: "white",
-              padding: "10px 15px",
-              borderRadius: "8px",
-              border: "1px solid #dee2e6",
-            }}
-          >
-            <span style={{ fontWeight: "600", color: "#495057" }}>
-              🔧 Chế độ:
-            </span>
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                cursor: "pointer",
-                fontSize: "14px",
-                color: "#495057",
-              }}
-            >
-              <input
-                type="radio"
-                name="importMode"
-                value="merge"
-                checked={importMode === "merge"}
-                onChange={(e) => setImportMode(e.target.value)}
-                style={{ marginRight: "5px" }}
-              />
-              🔄 Kết hợp
-            </label>
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                cursor: "pointer",
-                fontSize: "14px",
-                color: "#495057",
-              }}
-            >
-              <input
-                type="radio"
-                name="importMode"
-                value="replace"
-                checked={importMode === "replace"}
-                onChange={(e) => setImportMode(e.target.value)}
-                style={{ marginRight: "5px" }}
-              />
-              🗑️ Thay thế
-            </label>
-          </div>
-
-          {/* Upload Buttons */}
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              alignItems: "center",
-            }}
-          >
-            <button
-              onClick={downloadDefaultFile}
-              style={{
-                padding: "8px 16px",
-                fontSize: "14px",
-                backgroundColor: "#17a2b8",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                fontWeight: "500",
-              }}
-              title="Tải file mẫu KANJI_N3.xlsx về máy"
-            >
-              📥 Tải file mặc định
-            </button>
-
-            <button
-              onClick={loadDefaultFile}
-              style={{
-                padding: "8px 16px",
-                fontSize: "14px",
-                backgroundColor: "#007bff",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontWeight: "500",
-              }}
-            >
-              📂 Upload file mặc định
-            </button>
-
-            <button
-              onClick={() => fileInputRef.current.click()}
-              style={{
-                padding: "8px 16px",
-                fontSize: "14px",
-                backgroundColor: "#28a745",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontWeight: "500",
-              }}
-            >
-              📄 Upload file Excel
-            </button>
-          </div>
-        </div>
-      </div>
+      
+      {/* Hidden file input */}
+      <input
+        type="file"
+        accept=".xlsx,.xls"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
 
       <Routes>
         <Route
@@ -568,15 +433,187 @@ function App() {
                       <p
                         style={{
                           color: "#856404",
-                          marginBottom: 0,
+                          marginBottom: "20px",
                           fontSize: "16px",
                         }}
                       >
-                        Vui lòng tải file Excel chứa dữ liệu Kanji bằng thanh
-                        công cụ phía trên.
+                        Vui lòng tải file Excel chứa dữ liệu Kanji bằng các nút bên dưới.
                       </p>
                     </div>
                   )}
+                  
+                  {/* Import File Section - Centered */}
+                  <div style={{
+                    maxWidth: "700px",
+                    margin: "40px auto 0",
+                    backgroundColor: "#f8f9fa",
+                    padding: "30px",
+                    borderRadius: "15px",
+                    border: "1px solid #dee2e6",
+                    boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
+                  }}>
+                    {/* Import Mode Selection */}
+                    <div style={{ marginBottom: "25px" }}>
+                      <h3 style={{ color: "#495057", marginBottom: "15px", textAlign: "center" }}>
+                        🔧 Chế độ import dữ liệu
+                      </h3>
+                      <div style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: "20px",
+                        flexWrap: "wrap"
+                      }}>
+                        <label style={{
+                          display: "flex",
+                          alignItems: "center",
+                          cursor: "pointer",
+                          fontSize: "16px",
+                          color: "#495057",
+                          padding: "12px 20px",
+                          backgroundColor: importMode === "merge" ? "#e3f2fd" : "white",
+                          borderRadius: "10px",
+                          border: "2px solid " + (importMode === "merge" ? "#2196F3" : "#dee2e6"),
+                          transition: "all 0.3s ease"
+                        }}>
+                          <input
+                            type="radio"
+                            name="importMode"
+                            value="merge"
+                            checked={importMode === "merge"}
+                            onChange={(e) => setImportMode(e.target.value)}
+                            style={{ marginRight: "10px" }}
+                          />
+                          <div>
+                            <strong>🔄 Kết hợp dữ liệu</strong>
+                            <div style={{ fontSize: "12px", color: "#666", marginTop: "2px" }}>
+                              Giữ lại dữ liệu cũ và thêm/cập nhật
+                            </div>
+                          </div>
+                        </label>
+                        <label style={{
+                          display: "flex",
+                          alignItems: "center",
+                          cursor: "pointer",
+                          fontSize: "16px",
+                          color: "#495057",
+                          padding: "12px 20px",
+                          backgroundColor: importMode === "replace" ? "#e3f2fd" : "white",
+                          borderRadius: "10px",
+                          border: "2px solid " + (importMode === "replace" ? "#2196F3" : "#dee2e6"),
+                          transition: "all 0.3s ease"
+                        }}>
+                          <input
+                            type="radio"
+                            name="importMode"
+                            value="replace"
+                            checked={importMode === "replace"}
+                            onChange={(e) => setImportMode(e.target.value)}
+                            style={{ marginRight: "10px" }}
+                          />
+                          <div>
+                            <strong>🗑️ Thay thế hoàn toàn</strong>
+                            <div style={{ fontSize: "12px", color: "#666", marginTop: "2px" }}>
+                              Xóa tất cả dữ liệu cũ
+                            </div>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Upload buttons */}
+                    <div style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "15px",
+                      alignItems: "center"
+                    }}>
+                      <button
+                        onClick={downloadDefaultFile}
+                        style={{
+                          padding: "15px 30px",
+                          fontSize: "16px",
+                          backgroundColor: "#17a2b8",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "10px",
+                          cursor: "pointer",
+                          width: "100%",
+                          maxWidth: "350px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "10px",
+                          fontWeight: "600",
+                          transition: "all 0.3s ease"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = "#138496";
+                          e.target.style.transform = "translateY(-2px)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = "#17a2b8";
+                          e.target.style.transform = "translateY(0)";
+                        }}
+                        title="Tải file mẫu KANJI_N3.xlsx về máy"
+                      >
+                        📥 Tải file mặc định (KANJI_N3.xlsx)
+                      </button>
+                      
+                      <button
+                        onClick={loadDefaultFile}
+                        style={{
+                          padding: "15px 30px",
+                          fontSize: "16px",
+                          backgroundColor: "#007bff",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "10px",
+                          cursor: "pointer",
+                          width: "100%",
+                          maxWidth: "350px",
+                          fontWeight: "600",
+                          transition: "all 0.3s ease"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = "#0056b3";
+                          e.target.style.transform = "translateY(-2px)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = "#007bff";
+                          e.target.style.transform = "translateY(0)";
+                        }}
+                      >
+                        📂 Upload file mặc định vào hệ thống
+                      </button>
+                      
+                      <button
+                        onClick={() => fileInputRef.current.click()}
+                        style={{
+                          padding: "15px 30px",
+                          fontSize: "16px",
+                          backgroundColor: "#28a745",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "10px",
+                          cursor: "pointer",
+                          width: "100%",
+                          maxWidth: "350px",
+                          fontWeight: "600",
+                          transition: "all 0.3s ease"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = "#1e7e34";
+                          e.target.style.transform = "translateY(-2px)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = "#28a745";
+                          e.target.style.transform = "translateY(0)";
+                        }}
+                      >
+                        📄 Upload file Excel khác
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </header>
             </div>
