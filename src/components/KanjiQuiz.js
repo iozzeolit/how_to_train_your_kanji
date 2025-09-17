@@ -123,7 +123,7 @@ function KanjiQuiz({
               style={{
                 display: "flex",
                 alignItems: "center",
-                fontSize: "14px",
+                fontSize: "16px",
                 cursor: "pointer",
               }}
             >
@@ -147,14 +147,17 @@ function KanjiQuiz({
               width: "100%",
               padding: "8px",
               fontSize: "16px",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              boxSizing: "border-box",
               backgroundColor: showResult
                 ? skipFields.hanviet || isCorrect.hanviet
                   ? "#d4edda"
                   : "#f8d7da"
                 : skipFields.hanviet
-                ? "#f8f9fa"
+                ? "#f0f0f0"
                 : "white",
-              opacity: skipFields.hanviet ? 0.7 : 1,
+              color: skipFields.hanviet ? "#666" : "black",
             }}
             disabled={showResult || skipFields.hanviet}
             placeholder={skipFields.hanviet ? "Trường này được bỏ qua" : ""}
@@ -199,7 +202,7 @@ function KanjiQuiz({
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  fontSize: "14px",
+                  fontSize: "16px",
                   cursor: "pointer",
                 }}
               >
@@ -218,7 +221,14 @@ function KanjiQuiz({
             {Array.isArray(currentKanji.kun) &&
             currentKanji.kun.filter((r) => r.trim() !== "").length > 1 ? (
               // Multiple inputs for multiple kun readings
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  flexWrap: "wrap",
+                  alignItems: "stretch",
+                }}
+              >
                 {currentKanji.kun
                   .filter((r) => r.trim() !== "")
                   .map((reading, index) => (
@@ -231,10 +241,13 @@ function KanjiQuiz({
                       }
                       placeholder={`Âm kun thứ ${index + 1}`}
                       style={{
-                        flex: "1",
+                        flex: "1 1 0",
                         minWidth: "150px",
                         padding: "8px",
                         fontSize: "16px",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                        boxSizing: "border-box",
                         backgroundColor: showResult
                           ? skipFields.kun || isCorrect.kun
                             ? "#d4edda"
@@ -258,6 +271,9 @@ function KanjiQuiz({
                   width: "100%",
                   padding: "8px",
                   fontSize: "16px",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                  boxSizing: "border-box",
                   backgroundColor: showResult
                     ? skipFields.kun || isCorrect.kun
                       ? "#d4edda"
@@ -310,7 +326,7 @@ function KanjiQuiz({
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  fontSize: "14px",
+                  fontSize: "16px",
                   cursor: "pointer",
                 }}
               >
@@ -329,7 +345,14 @@ function KanjiQuiz({
             {Array.isArray(currentKanji.on) &&
             currentKanji.on.filter((r) => r.trim() !== "").length > 1 ? (
               // Multiple inputs for multiple on readings
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  flexWrap: "wrap",
+                  alignItems: "stretch",
+                }}
+              >
                 {currentKanji.on
                   .filter((r) => r.trim() !== "")
                   .map((reading, index) => (
@@ -342,10 +365,13 @@ function KanjiQuiz({
                       }
                       placeholder={`Âm on thứ ${index + 1}`}
                       style={{
-                        flex: "1",
+                        flex: "1 1 0",
                         minWidth: "150px",
                         padding: "8px",
                         fontSize: "16px",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                        boxSizing: "border-box",
                         backgroundColor: showResult
                           ? skipFields.on || isCorrect.on
                             ? "#d4edda"
@@ -369,6 +395,9 @@ function KanjiQuiz({
                   width: "100%",
                   padding: "8px",
                   fontSize: "16px",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                  boxSizing: "border-box",
                   backgroundColor: showResult
                     ? skipFields.on || isCorrect.on
                       ? "#d4edda"
