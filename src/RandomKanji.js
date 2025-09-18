@@ -14,6 +14,7 @@ function RandomKanji({ kanjiData }) {
   });
   const [filteredKanjiData, setFilteredKanjiData] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [kanjiHistory, setKanjiHistory] = useState([]); // Track visited kanji for previous navigation
 
   // Quiz states
   const [currentKanji, setCurrentKanji] = useState(null);
@@ -123,13 +124,14 @@ function RandomKanji({ kanjiData }) {
     setFilteredKanjiData(filtered);
     setCurrentIndex(0);
     setShowConfig(false);
+    setKanjiHistory([]); // Reset history when starting new quiz
 
-    // Select first kanji
-    selectKanji(filtered, 0);
+    // Select first kanji (don't add to history)
+    selectKanji(filtered, 0, false);
   };
 
   // Select kanji based on mode and index
-  const selectKanji = (dataArray, index) => {
+  const selectKanji = (dataArray, index, addToHistory = true) => {
     if (dataArray.length === 0) return;
 
     let selectedKanji;
@@ -142,6 +144,20 @@ function RandomKanji({ kanjiData }) {
 
     setCurrentKanji(selectedKanji);
     setShowResult(false);
+
+    // Add to history only when explicitly requested (not during initialization)
+    if (addToHistory) {
+      setKanjiHistory((prev) => {
+        // Avoid duplicating if it's the same kanji
+        if (
+          prev.length === 0 ||
+          prev[prev.length - 1]?.kanji !== selectedKanji.kanji
+        ) {
+          return [...prev, selectedKanji];
+        }
+        return prev;
+      });
+    }
 
     // Initialize userAnswers based on readings count
     const kunCount = Array.isArray(selectedKanji.kun)
@@ -162,6 +178,39 @@ function RandomKanji({ kanjiData }) {
     });
     // Keep skipFields and romajiMode unchanged to preserve user preferences
     setIsCorrect({ hanviet: false, kun: false, on: false });
+  };
+
+  // Handle going back to previous kanji
+  const handlePrevious = () => {
+    if (kanjiHistory.length > 1) {
+      // Remove current kanji from history and get previous one
+      const newHistory = [...kanjiHistory];
+      newHistory.pop(); // Remove current
+      const previousKanji = newHistory[newHistory.length - 1];
+
+      setKanjiHistory(newHistory);
+      setCurrentKanji(previousKanji);
+      setShowResult(false);
+
+      // Reset user answers for the previous kanji
+      const kunCount = Array.isArray(previousKanji.kun)
+        ? previousKanji.kun.filter((r) => r.trim() !== "").length
+        : previousKanji.kun && previousKanji.kun.trim() !== ""
+        ? 1
+        : 0;
+      const onCount = Array.isArray(previousKanji.on)
+        ? previousKanji.on.filter((r) => r.trim() !== "").length
+        : previousKanji.on && previousKanji.on.trim() !== ""
+        ? 1
+        : 0;
+
+      setUserAnswers({
+        hanviet: "",
+        kun: new Array(kunCount).fill(""),
+        on: new Array(onCount).fill(""),
+      });
+      setIsCorrect({ hanviet: false, kun: false, on: false });
+    }
   };
 
   // Handle checkbox changes
@@ -419,7 +468,7 @@ function RandomKanji({ kanjiData }) {
       const nextIndex =
         displayMode === "order" ? currentIndex + 1 : currentIndex;
       setCurrentIndex(nextIndex);
-      selectKanji(filteredKanjiData, nextIndex);
+      selectKanji(filteredKanjiData, nextIndex, true); // Add to history when moving next
     }
   };
 
@@ -683,6 +732,7 @@ function RandomKanji({ kanjiData }) {
         onRomajiModeChange={handleRomajiModeChange}
         onSubmit={handleSubmit}
         onNext={getNextKanji}
+        onPrevious={kanjiHistory.length > 1 ? handlePrevious : null}
       />
 
       {showResult && currentKanji.example && (

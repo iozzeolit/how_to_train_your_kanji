@@ -8,8 +8,10 @@ function KanjiQuiz({
   onInputChange,
   onSubmit,
   onNext,
+  onPrevious = null, // Callback for going to previous kanji
   submitButtonText = "Kiểm tra",
   nextButtonText = "Chữ tiếp theo",
+  previousButtonText = "Chữ trước",
   additionalInfo = null, // For displaying extra info like progress
   skipFields = {}, // Object with hanviet, kun, on boolean flags
   onSkipFieldChange = () => {}, // Callback for skip field changes
@@ -829,6 +831,7 @@ function KanjiQuiz({
           >
             {submitButtonText}
           </button>
+
           <button
             type="button"
             onClick={onNext}
@@ -844,6 +847,24 @@ function KanjiQuiz({
           >
             {nextButtonText}
           </button>
+          {onPrevious && (
+            <button
+              type="button"
+              onClick={onPrevious}
+              style={{
+                padding: "10px 20px",
+                fontSize: "16px",
+                backgroundColor: "#6c757d",
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+                marginLeft: "10px",
+              }}
+            >
+              {previousButtonText}
+            </button>
+          )}
         </div>
         {!showResult && (
           <div

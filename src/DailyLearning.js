@@ -408,6 +408,45 @@ function DailyLearning({ kanjiData }) {
     setIsCorrect({ hanviet: false, kun: false, on: false });
   };
 
+  // Quay lại kanji trước đó
+  const handlePreviousKanji = () => {
+    const todayKanji = learningPlan[currentDay - 1]?.kanji || [];
+    let newIndex;
+
+    if (currentKanjiIndex > 0) {
+      newIndex = currentKanjiIndex - 1;
+    } else {
+      newIndex = todayKanji.length - 1; // Quay về kanji cuối cùng
+    }
+
+    setCurrentKanjiIndex(newIndex);
+
+    // Khởi tạo userAnswers dựa trên kanji trước đó
+    const previousKanji = todayKanji[newIndex];
+    if (previousKanji) {
+      const kunCount = Array.isArray(previousKanji.kun)
+        ? previousKanji.kun.filter((r) => r.trim() !== "").length
+        : previousKanji.kun && previousKanji.kun.trim() !== ""
+        ? 1
+        : 0;
+      const onCount = Array.isArray(previousKanji.on)
+        ? previousKanji.on.filter((r) => r.trim() !== "").length
+        : previousKanji.on && previousKanji.on.trim() !== ""
+        ? 1
+        : 0;
+
+      setUserAnswers({
+        hanviet: "",
+        kun: new Array(kunCount).fill(""),
+        on: new Array(onCount).fill(""),
+      });
+    }
+
+    // Keep skipFields and romajiMode unchanged to preserve user preferences
+    setShowResult(false);
+    setIsCorrect({ hanviet: false, kun: false, on: false });
+  };
+
   // Thay đổi input
   const handleInputChange = (field, value, index = null) => {
     setUserAnswers((prev) => {
@@ -798,6 +837,7 @@ function DailyLearning({ kanjiData }) {
               onRomajiModeChange={handleRomajiModeChange}
               onSubmit={handleSubmit}
               onNext={nextKanji}
+              onPrevious={handlePreviousKanji}
               nextButtonText="Từ tiếp theo"
               additionalInfo={null}
             />
