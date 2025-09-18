@@ -187,10 +187,10 @@ function KanjiQuiz({
     const handleKeyPress = (e) => {
       // Don't trigger navigation keys if user is typing in an input field
       const activeElement = document.activeElement;
-      const isTyping = activeElement && (
-        activeElement.tagName === 'INPUT' || 
-        activeElement.tagName === 'TEXTAREA'
-      );
+      const isTyping =
+        activeElement &&
+        (activeElement.tagName === "INPUT" ||
+          activeElement.tagName === "TEXTAREA");
 
       // Handle Ctrl key to submit (check answers) - works even when typing
       if (e.key === "Control" && !showResult) {
@@ -895,7 +895,9 @@ function KanjiQuiz({
               color: "#6c757d",
             }}
           >
-            💡 Phím tắt: <strong>Ctrl</strong> = Kiểm tra{onPrevious && ", "}<strong>,</strong> = Chữ trước{onPrevious && ""}, <strong>.</strong> = Chữ tiếp theo
+            💡 Phím tắt: <strong>Ctrl</strong> = Kiểm tra{onPrevious && ", "}
+            <strong>,</strong> = Chữ trước{onPrevious && ""}, <strong>.</strong>{" "}
+            = Chữ tiếp theo
           </div>
         )}
       </form>
