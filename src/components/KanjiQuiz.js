@@ -487,7 +487,11 @@ function KanjiQuiz({
               }}
             >
               {skipFields.hanviet
-                ? "⏭️ Đã bỏ qua trường này"
+                ? `⏭️ Đã bỏ qua trường này. Đáp án: ${
+                    Array.isArray(currentKanji.hanviet)
+                      ? currentKanji.hanviet.join("、")
+                      : currentKanji.hanviet
+                  }`
                 : isCorrect.hanviet
                 ? "✓ Đúng!"
                 : `✗ Sai! Đáp án: ${
@@ -646,7 +650,19 @@ function KanjiQuiz({
                 }}
               >
                 {skipFields.kun
-                  ? "✓ Skipped (automatically correct)"
+                  ? `⏭️ Đã bỏ qua trường này. Đáp án: ${
+                      Array.isArray(currentKanji.kun)
+                        ? currentKanji.kun
+                            .map((reading) =>
+                              romajiMode.kun
+                                ? hiraganaToRomaji(reading)
+                                : reading
+                            )
+                            .join("、")
+                        : romajiMode.kun
+                        ? hiraganaToRomaji(currentKanji.kun)
+                        : currentKanji.kun
+                    }`
                   : isCorrect.kun
                   ? "✓ Đúng!"
                   : `✗ Sai! Đáp án: ${
@@ -812,7 +828,19 @@ function KanjiQuiz({
                 }}
               >
                 {skipFields.on
-                  ? "✓ Skipped (automatically correct)"
+                  ? `⏭️ Đã bỏ qua trường này. Đáp án: ${
+                      Array.isArray(currentKanji.on)
+                        ? currentKanji.on
+                            .map((reading) =>
+                              romajiMode.on
+                                ? hiraganaToRomaji(reading)
+                                : reading
+                            )
+                            .join("、")
+                        : romajiMode.on
+                        ? hiraganaToRomaji(currentKanji.on)
+                        : currentKanji.on
+                    }`
                   : isCorrect.on
                   ? "✓ Đúng!"
                   : `✗ Sai! Đáp án: ${
