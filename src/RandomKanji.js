@@ -23,19 +23,23 @@ function RandomKanji({ kanjiData }) {
     on: [],
   });
   const [skipFields, setSkipFields] = useState(() => {
-    const saved = localStorage.getItem('kanjiQuiz_skipFields');
-    return saved ? JSON.parse(saved) : {
-      hanviet: false,
-      kun: false,
-      on: false,
-    };
+    const saved = localStorage.getItem("kanjiQuiz_skipFields");
+    return saved
+      ? JSON.parse(saved)
+      : {
+          hanviet: false,
+          kun: false,
+          on: false,
+        };
   });
   const [romajiMode, setRomajiMode] = useState(() => {
-    const saved = localStorage.getItem('kanjiQuiz_romajiMode');
-    return saved ? JSON.parse(saved) : {
-      kun: false,
-      on: false,
-    };
+    const saved = localStorage.getItem("kanjiQuiz_romajiMode");
+    return saved
+      ? JSON.parse(saved)
+      : {
+          kun: false,
+          on: false,
+        };
   });
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState({
@@ -46,11 +50,11 @@ function RandomKanji({ kanjiData }) {
 
   // Save skipFields and romajiMode to localStorage when they change
   useEffect(() => {
-    localStorage.setItem('kanjiQuiz_skipFields', JSON.stringify(skipFields));
+    localStorage.setItem("kanjiQuiz_skipFields", JSON.stringify(skipFields));
   }, [skipFields]);
 
   useEffect(() => {
-    localStorage.setItem('kanjiQuiz_romajiMode', JSON.stringify(romajiMode));
+    localStorage.setItem("kanjiQuiz_romajiMode", JSON.stringify(romajiMode));
   }, [romajiMode]);
 
   // Filter and prepare kanji data based on selected types

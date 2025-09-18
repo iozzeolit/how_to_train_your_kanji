@@ -180,6 +180,27 @@ function KanjiQuiz({
     }
   }, [skipFields.hanviet, skipFields.kun, skipFields.on, showResult]);
 
+  // Handle Ctrl key press to submit (check answers)
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Only trigger if Ctrl is pressed and we're not showing result yet
+      if (e.key === "Control" && !showResult) {
+        // Prevent default behavior
+        e.preventDefault();
+        // Trigger submit (allow even when focused in input)
+        onSubmit(e);
+      }
+    };
+
+    // Add event listener
+    document.addEventListener("keydown", handleKeyPress);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [showResult, onSubmit]);
+
   // Hàm chuyển đổi hiragana sang romaji
   const hiraganaToRomaji = (hiragana) => {
     const map = {
@@ -824,6 +845,18 @@ function KanjiQuiz({
             {nextButtonText}
           </button>
         </div>
+        {!showResult && (
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: "10px",
+              fontSize: "14px",
+              color: "#6c757d",
+            }}
+          >
+            💡 Mẹo: Nhấn phím <strong>Ctrl</strong> để kiểm tra nhanh
+          </div>
+        )}
       </form>
     </div>
   );
