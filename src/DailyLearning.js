@@ -44,6 +44,7 @@ function DailyLearning({ kanjiData }) {
     const saved = localStorage.getItem("dailyLearning_hideCompleted");
     return saved ? JSON.parse(saved) : false;
   });
+  const [recentlyUpdatedDays, setRecentlyUpdatedDays] = useState(new Set());
 
   // Save skipFields and romajiMode to localStorage when they change
   useEffect(() => {
@@ -79,6 +80,96 @@ function DailyLearning({ kanjiData }) {
       setIsPlanSet(true);
     }
   }, []);
+
+  // Theo dõi thay đổi trong kanjiData và cập nhật kế hoạch học
+  useEffect(() => {
+    if (kanjiData.length === 0 || !isPlanSet) return;
+
+    const savedPlan = localStorage.getItem("dailyLearningPlan");
+    if (!savedPlan) return;
+
+    const currentPlan = JSON.parse(savedPlan);
+    const allExistingKanji = currentPlan.flatMap((day) => day.kanji);
+
+    // Tìm các từ mới (không có trong kế hoạch hiện tại)
+    const newKanji = kanjiData.filter(
+      (newKanji) =>
+        !allExistingKanji.some(
+          (existingKanji) => existingKanji.kanji === newKanji.kanji
+        )
+    );
+
+    // Tìm các từ đã được cập nhật
+    const updatedDays = new Set();
+    currentPlan.forEach((day, dayIndex) => {
+      day.kanji.forEach((existingKanji, kanjiIndex) => {
+        const updatedKanji = kanjiData.find(
+          (k) => k.kanji === existingKanji.kanji
+        );
+        if (
+          updatedKanji &&
+          JSON.stringify(updatedKanji) !== JSON.stringify(existingKanji)
+        ) {
+          // Cập nhật từ kanji trong kế hoạch
+          currentPlan[dayIndex].kanji[kanjiIndex] = updatedKanji;
+          updatedDays.add(dayIndex + 1);
+        }
+      });
+    });
+
+    // Xử lý từ mới
+    if (newKanji.length > 0) {
+      let updatedPlan = [...currentPlan];
+      let remainingNewKanji = [...newKanji];
+
+      while (remainingNewKanji.length > 0) {
+        const lastDay = updatedPlan[updatedPlan.length - 1];
+        const availableSlots = wordsPerDay - lastDay.kanji.length;
+
+        if (availableSlots > 0) {
+          // Thêm từ mới vào ngày cuối cùng
+          const kanjiToAdd = remainingNewKanji.splice(0, availableSlots);
+          lastDay.kanji.push(...kanjiToAdd);
+          updatedDays.add(updatedPlan.length);
+        } else {
+          // Tạo ngày mới
+          const kanjiToAdd = remainingNewKanji.splice(0, wordsPerDay);
+          updatedPlan.push({
+            day: updatedPlan.length + 1,
+            kanji: kanjiToAdd,
+            completed: false,
+          });
+          updatedDays.add(updatedPlan.length);
+        }
+      }
+
+      setLearningPlan(updatedPlan);
+      localStorage.setItem("dailyLearningPlan", JSON.stringify(updatedPlan));
+    } else if (updatedDays.size > 0) {
+      // Chỉ cập nhật nếu có thay đổi
+      setLearningPlan(currentPlan);
+      localStorage.setItem("dailyLearningPlan", JSON.stringify(currentPlan));
+    }
+
+    // Hiển thị thông báo về các ngày được cập nhật
+    if (updatedDays.size > 0) {
+      const daysList = Array.from(updatedDays)
+        .sort((a, b) => a - b)
+        .join(", ");
+      const message =
+        newKanji.length > 0
+          ? `Đã thêm ${newKanji.length} từ mới và cập nhật các ngày: ${daysList}`
+          : `Đã cập nhật các từ kanji trong các ngày: ${daysList}`;
+
+      // Đánh dấu các ngày được cập nhật
+      setRecentlyUpdatedDays(new Set(updatedDays));
+
+      // Xóa đánh dấu sau 5 giây
+      setTimeout(() => {
+        setRecentlyUpdatedDays(new Set());
+      }, 5000);
+    }
+  }, [kanjiData, isPlanSet, wordsPerDay]);
 
   // Initialize userAnswers when current kanji changes
   useEffect(() => {
@@ -399,7 +490,6 @@ function DailyLearning({ kanjiData }) {
       // Kiểm tra xem đã hoàn thành ngày chưa
       const todayKanji = learningPlan[currentDay - 1].kanji;
       if (newProgress[dayKey].length === todayKanji.length) {
-        alert(`Chúc mừng! Bạn đã hoàn thành ngày ${currentDay}!`);
         // Chuyển sang ngày tiếp theo nếu có
         if (currentDay < learningPlan.length) {
           setCurrentDay(currentDay + 1);
@@ -1010,6 +1100,7 @@ function DailyLearning({ kanjiData }) {
               const dayProgress = dailyProgress[`day${dayNumber}`] || [];
               const isCompleted = dayProgress.length === day.kanji.length;
               const isCurrent = dayNumber === currentDay;
+              const isRecentlyUpdated = recentlyUpdatedDays.has(dayNumber);
 
               return (
                 <div
@@ -1033,10 +1124,29 @@ function DailyLearning({ kanjiData }) {
                     color: "black",
                     border: isCurrent ? "3px solid #007bff" : "none",
                     transition: "all 0.2s ease",
+                    position: "relative",
                   }}
-                  title={`Ngày ${dayNumber}: ${dayProgress.length}/${day.kanji.length} từ - Click để chuyển đến ngày này`}
+                  title={`Ngày ${dayNumber}: ${dayProgress.length}/${
+                    day.kanji.length
+                  } từ${
+                    isRecentlyUpdated ? " - Vừa được cập nhật!" : ""
+                  } - Click để chuyển đến ngày này`}
                 >
                   {dayNumber}
+                  {isRecentlyUpdated && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "-2px",
+                        right: "-2px",
+                        width: "8px",
+                        height: "8px",
+                        backgroundColor: "#ff6b6b",
+                        borderRadius: "50%",
+                        zIndex: 10,
+                      }}
+                    />
+                  )}
                 </div>
               );
             })}
@@ -1048,8 +1158,11 @@ function DailyLearning({ kanjiData }) {
             <div style={{ marginBottom: "3px" }}>
               <span style={{ color: "#ffc107" }}>■</span> Đang học
             </div>
-            <div>
+            <div style={{ marginBottom: "3px" }}>
               <span style={{ color: "#E7E4E4" }}>■</span> Chưa học
+            </div>
+            <div>
+              <span style={{ color: "#ff6b6b" }}>●</span> Vừa cập nhật
             </div>
           </div>
         </div>
