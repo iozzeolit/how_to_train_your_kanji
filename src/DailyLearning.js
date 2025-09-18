@@ -161,11 +161,14 @@ function DailyLearning({ kanjiData }) {
     if (!learningPlan[currentDay - 1]) return [];
     const todayKanji = learningPlan[currentDay - 1].kanji;
     const todayProgress = dailyProgress[`day${currentDay}`] || [];
-    
+
     if (!hideCompletedWords) {
-      return todayKanji.map((kanji, index) => ({ kanji, originalIndex: index }));
+      return todayKanji.map((kanji, index) => ({
+        kanji,
+        originalIndex: index,
+      }));
     }
-    
+
     return todayKanji
       .map((kanji, index) => ({ kanji, originalIndex: index }))
       .filter(({ originalIndex }) => !todayProgress.includes(originalIndex));
@@ -411,7 +414,7 @@ function DailyLearning({ kanjiData }) {
   const nextKanji = () => {
     const filteredKanji = getFilteredTodayKanji();
     if (filteredKanji.length === 0) return;
-    
+
     if (currentKanjiIndex < filteredKanji.length - 1) {
       setCurrentKanjiIndex(currentKanjiIndex + 1);
     } else {
@@ -419,7 +422,8 @@ function DailyLearning({ kanjiData }) {
     }
 
     // Khởi tạo userAnswers dựa trên kanji hiện tại
-    const nextIndex = currentKanjiIndex < filteredKanji.length - 1 ? currentKanjiIndex + 1 : 0;
+    const nextIndex =
+      currentKanjiIndex < filteredKanji.length - 1 ? currentKanjiIndex + 1 : 0;
     const currentKanji = filteredKanji[nextIndex]?.kanji;
     if (currentKanji) {
       const kunCount = Array.isArray(currentKanji.kun)
@@ -451,7 +455,7 @@ function DailyLearning({ kanjiData }) {
   const handlePreviousKanji = () => {
     const filteredKanji = getFilteredTodayKanji();
     if (filteredKanji.length === 0) return;
-    
+
     let newIndex;
     if (currentKanjiIndex > 0) {
       newIndex = currentKanjiIndex - 1;
@@ -741,6 +745,27 @@ function DailyLearning({ kanjiData }) {
               }}
             ></div>
           </div>
+          
+          {/* Checkbox Ẩn từ đã hoàn thành */}
+          <div style={{ marginTop: "15px" }}>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                fontSize: "14px",
+                cursor: "pointer",
+                color: "#6c757d",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={hideCompletedWords}
+                onChange={(e) => setHideCompletedWords(e.target.checked)}
+                style={{ marginRight: "8px" }}
+              />
+              Ẩn từ đã hoàn thành
+            </label>
+          </div>
         </div>
 
         {/* Chi tiết học tập cho ngày hiện tại */}
@@ -772,23 +797,6 @@ function DailyLearning({ kanjiData }) {
                   : todayKanji.length}{" "}
                 / {todayKanji.length} từ)
               </h4>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  fontSize: "14px",
-                  cursor: "pointer",
-                  color: "#6c757d",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={hideCompletedWords}
-                  onChange={(e) => setHideCompletedWords(e.target.checked)}
-                  style={{ marginRight: "8px" }}
-                />
-                Ẩn từ đã hoàn thành
-              </label>
             </div>
             <div style={{ display: "grid", gap: "15px" }}>
               {todayKanji
@@ -939,7 +947,9 @@ function DailyLearning({ kanjiData }) {
                 ✏️ <strong>Chế độ kiểm tra</strong> - Từ {currentKanjiIndex + 1}
                 /{getFilteredTodayKanji().length}
                 {hideCompletedWords && " (Chỉ từ chưa hoàn thành)"}
-                {!hideCompletedWords && todayProgress.includes(getCurrentOriginalIndex()) && " (Đã hoàn thành)"}
+                {!hideCompletedWords &&
+                  todayProgress.includes(getCurrentOriginalIndex()) &&
+                  " (Đã hoàn thành)"}
               </p>
             </div>
 
