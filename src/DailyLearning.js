@@ -41,7 +41,7 @@ function DailyLearning({ kanjiData }) {
   const [isPlanSet, setIsPlanSet] = useState(false);
   const [showStudyMode, setShowStudyMode] = useState(false);
   const [hideCompletedWords, setHideCompletedWords] = useState(() => {
-    const saved = localStorage.getItem('dailyLearning_hideCompleted');
+    const saved = localStorage.getItem("dailyLearning_hideCompleted");
     return saved ? JSON.parse(saved) : false;
   });
 
@@ -55,7 +55,13 @@ function DailyLearning({ kanjiData }) {
   }, [romajiMode]);
 
   useEffect(() => {
-    localStorage.setItem('dailyLearning_hideCompleted', JSON.stringify(hideCompletedWords));
+    localStorage.setItem(
+      "dailyLearning_hideCompleted",
+      JSON.stringify(hideCompletedWords)
+    );
+    // Reset currentKanjiIndex when toggling filter to avoid index out of bounds
+    setCurrentKanjiIndex(0);
+    setShowResult(false);
   }, [hideCompletedWords]);
 
   // Load dữ liệu từ localStorage
@@ -145,7 +151,31 @@ function DailyLearning({ kanjiData }) {
   // Lấy kanji hiện tại
   const getCurrentKanji = () => {
     if (!learningPlan[currentDay - 1]) return null;
-    return learningPlan[currentDay - 1].kanji[currentKanjiIndex];
+    const filteredKanji = getFilteredTodayKanji();
+    const current = filteredKanji[currentKanjiIndex];
+    return current ? current.kanji : null;
+  };
+
+  // Lấy danh sách kanji đã lọc theo checkbox
+  const getFilteredTodayKanji = () => {
+    if (!learningPlan[currentDay - 1]) return [];
+    const todayKanji = learningPlan[currentDay - 1].kanji;
+    const todayProgress = dailyProgress[`day${currentDay}`] || [];
+    
+    if (!hideCompletedWords) {
+      return todayKanji.map((kanji, index) => ({ kanji, originalIndex: index }));
+    }
+    
+    return todayKanji
+      .map((kanji, index) => ({ kanji, originalIndex: index }))
+      .filter(({ originalIndex }) => !todayProgress.includes(originalIndex));
+  };
+
+  // Lấy original index của kanji hiện tại
+  const getCurrentOriginalIndex = () => {
+    const filteredKanji = getFilteredTodayKanji();
+    const current = filteredKanji[currentKanjiIndex];
+    return current ? current.originalIndex : currentKanjiIndex;
   };
 
   // Xử lý submit
@@ -350,14 +380,15 @@ function DailyLearning({ kanjiData }) {
     setShowResult(true);
 
     if (allCorrect) {
-      // Cập nhật progress
+      // Cập nhật progress với original index
+      const originalIndex = getCurrentOriginalIndex();
       const newProgress = { ...dailyProgress };
       const dayKey = `day${currentDay}`;
       if (!newProgress[dayKey]) {
         newProgress[dayKey] = [];
       }
-      if (!newProgress[dayKey].includes(currentKanjiIndex)) {
-        newProgress[dayKey].push(currentKanjiIndex);
+      if (!newProgress[dayKey].includes(originalIndex)) {
+        newProgress[dayKey].push(originalIndex);
       }
       setDailyProgress(newProgress);
       localStorage.setItem("dailyProgress", JSON.stringify(newProgress));
@@ -378,18 +409,18 @@ function DailyLearning({ kanjiData }) {
 
   // Chuyển sang kanji tiếp theo
   const nextKanji = () => {
-    const todayKanji = learningPlan[currentDay - 1]?.kanji || [];
-    if (currentKanjiIndex < todayKanji.length - 1) {
+    const filteredKanji = getFilteredTodayKanji();
+    if (filteredKanji.length === 0) return;
+    
+    if (currentKanjiIndex < filteredKanji.length - 1) {
       setCurrentKanjiIndex(currentKanjiIndex + 1);
     } else {
       setCurrentKanjiIndex(0);
     }
 
     // Khởi tạo userAnswers dựa trên kanji hiện tại
-    const currentKanji =
-      todayKanji[
-        currentKanjiIndex < todayKanji.length - 1 ? currentKanjiIndex + 1 : 0
-      ];
+    const nextIndex = currentKanjiIndex < filteredKanji.length - 1 ? currentKanjiIndex + 1 : 0;
+    const currentKanji = filteredKanji[nextIndex]?.kanji;
     if (currentKanji) {
       const kunCount = Array.isArray(currentKanji.kun)
         ? currentKanji.kun.filter((r) => r.trim() !== "").length
@@ -418,19 +449,20 @@ function DailyLearning({ kanjiData }) {
 
   // Quay lại kanji trước đó
   const handlePreviousKanji = () => {
-    const todayKanji = learningPlan[currentDay - 1]?.kanji || [];
+    const filteredKanji = getFilteredTodayKanji();
+    if (filteredKanji.length === 0) return;
+    
     let newIndex;
-
     if (currentKanjiIndex > 0) {
       newIndex = currentKanjiIndex - 1;
     } else {
-      newIndex = todayKanji.length - 1; // Quay về kanji cuối cùng
+      newIndex = filteredKanji.length - 1; // Quay về kanji cuối cùng
     }
 
     setCurrentKanjiIndex(newIndex);
 
     // Khởi tạo userAnswers dựa trên kanji trước đó
-    const previousKanji = todayKanji[newIndex];
+    const previousKanji = filteredKanji[newIndex]?.kanji;
     if (previousKanji) {
       const kunCount = Array.isArray(previousKanji.kun)
         ? previousKanji.kun.filter((r) => r.trim() !== "").length
@@ -723,26 +755,32 @@ function DailyLearning({ kanjiData }) {
               overflowY: "auto",
             }}
           >
-            <div style={{ 
-              display: "flex", 
-              justifyContent: "space-between", 
-              alignItems: "center", 
-              marginBottom: "15px" 
-            }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "15px",
+              }}
+            >
               <h4 style={{ marginTop: 0, marginBottom: 0, color: "#495057" }}>
-                Chi tiết học tập - Ngày {currentDay} ({
-                  hideCompletedWords 
-                    ? todayKanji.filter((_, index) => !todayProgress.includes(index)).length
-                    : todayKanji.length
-                } / {todayKanji.length} từ)
+                Chi tiết học tập - Ngày {currentDay} (
+                {hideCompletedWords
+                  ? todayKanji.filter(
+                      (_, index) => !todayProgress.includes(index)
+                    ).length
+                  : todayKanji.length}{" "}
+                / {todayKanji.length} từ)
               </h4>
-              <label style={{ 
-                display: "flex", 
-                alignItems: "center", 
-                fontSize: "14px", 
-                cursor: "pointer",
-                color: "#6c757d"
-              }}>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  color: "#6c757d",
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={hideCompletedWords}
@@ -761,99 +799,105 @@ function DailyLearning({ kanjiData }) {
                 })
                 .map(({ kanji, index }) => {
                   const isCompleted = todayProgress.includes(index);
-                return (
-                  <div
-                    key={index}
-                    style={{
-                      border: "1px solid #e0e0e0",
-                      borderRadius: "8px",
-                      padding: "15px",
-                      backgroundColor: isCompleted ? "#e8f5e8" : "#f9f9f9",
-                      borderLeft: `4px solid ${
-                        isCompleted ? "#28a745" : "#6c757d"
-                      }`,
-                    }}
-                  >
+                  return (
                     <div
+                      key={index}
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "15px",
-                        marginBottom: "10px",
+                        border: "1px solid #e0e0e0",
+                        borderRadius: "8px",
+                        padding: "15px",
+                        backgroundColor: isCompleted ? "#e8f5e8" : "#f9f9f9",
+                        borderLeft: `4px solid ${
+                          isCompleted ? "#28a745" : "#6c757d"
+                        }`,
                       }}
                     >
                       <div
                         style={{
-                          fontSize: "70px",
-                          fontWeight: "bold",
-                          minWidth: "50px",
-                          textAlign: "center",
-                          margin: "0px 5px",
-                          position: "relative",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "15px",
+                          marginBottom: "10px",
                         }}
                       >
-                        {kanji.kanji}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ marginBottom: "5px", fontSize: "24px" }}>
-                          <strong>Hán Việt:</strong>{" "}
-                          {Array.isArray(kanji.hanviet)
-                            ? kanji.hanviet.join("、")
-                            : kanji.hanviet}
+                        <div
+                          style={{
+                            fontSize: "70px",
+                            fontWeight: "bold",
+                            minWidth: "50px",
+                            textAlign: "center",
+                            margin: "0px 5px",
+                            position: "relative",
+                          }}
+                        >
+                          {kanji.kanji}
                         </div>
-                        {hasReading(kanji.kun) && (
+                        <div style={{ flex: 1 }}>
                           <div
                             style={{ marginBottom: "5px", fontSize: "24px" }}
                           >
-                            <strong>Âm Kun:</strong>{" "}
-                            {Array.isArray(kanji.kun)
-                              ? kanji.kun.join("、")
-                              : kanji.kun}
+                            <strong>Hán Việt:</strong>{" "}
+                            {Array.isArray(kanji.hanviet)
+                              ? kanji.hanviet.join("、")
+                              : kanji.hanviet}
                           </div>
-                        )}
-                        {hasReading(kanji.on) && (
-                          <div
-                            style={{ marginBottom: "5px", fontSize: "24px" }}
-                          >
-                            <strong>Âm On:</strong>{" "}
-                            {Array.isArray(kanji.on)
-                              ? kanji.on.join("、")
-                              : kanji.on}
-                          </div>
-                        )}
+                          {hasReading(kanji.kun) && (
+                            <div
+                              style={{ marginBottom: "5px", fontSize: "24px" }}
+                            >
+                              <strong>Âm Kun:</strong>{" "}
+                              {Array.isArray(kanji.kun)
+                                ? kanji.kun.join("、")
+                                : kanji.kun}
+                            </div>
+                          )}
+                          {hasReading(kanji.on) && (
+                            <div
+                              style={{ marginBottom: "5px", fontSize: "24px" }}
+                            >
+                              <strong>Âm On:</strong>{" "}
+                              {Array.isArray(kanji.on)
+                                ? kanji.on.join("、")
+                                : kanji.on}
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ textAlign: "center", minWidth: "80px" }}>
+                          {isCompleted ? (
+                            <span
+                              style={{ color: "#28a745", fontSize: "18px" }}
+                            >
+                              ✓ Hoàn thành
+                            </span>
+                          ) : (
+                            <span
+                              style={{ color: "#6c757d", fontSize: "14px" }}
+                            >
+                              Chưa học
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div style={{ textAlign: "center", minWidth: "80px" }}>
-                        {isCompleted ? (
-                          <span style={{ color: "#28a745", fontSize: "18px" }}>
-                            ✓ Hoàn thành
-                          </span>
-                        ) : (
-                          <span style={{ color: "#6c757d", fontSize: "14px" }}>
-                            Chưa học
-                          </span>
-                        )}
-                      </div>
-                    </div>
 
-                    {/* Từ ví dụ */}
-                    {kanji.example && kanji.example.length > 0 && (
-                      <div
-                        style={{
-                          borderTop: "1px solid #e0e0e0",
-                          paddingTop: "0px",
-                          marginTop: "10px",
-                        }}
-                      >
-                        <ExampleWords
-                          examples={kanji.example}
-                          title="Từ ví dụ"
-                          fontSize="36px"
-                        />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                      {/* Từ ví dụ */}
+                      {kanji.example && kanji.example.length > 0 && (
+                        <div
+                          style={{
+                            borderTop: "1px solid #e0e0e0",
+                            paddingTop: "0px",
+                            marginTop: "10px",
+                          }}
+                        >
+                          <ExampleWords
+                            examples={kanji.example}
+                            title="Từ ví dụ"
+                            fontSize="36px"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           </div>
         )}
@@ -893,10 +937,9 @@ function DailyLearning({ kanjiData }) {
             >
               <p style={{ margin: 0, color: "#856404", fontSize: "14px" }}>
                 ✏️ <strong>Chế độ kiểm tra</strong> - Từ {currentKanjiIndex + 1}
-                /{todayKanji.length}
-                {todayProgress.includes(currentKanjiIndex)
-                  ? " (Đã hoàn thành)"
-                  : ""}
+                /{getFilteredTodayKanji().length}
+                {hideCompletedWords && " (Chỉ từ chưa hoàn thành)"}
+                {!hideCompletedWords && todayProgress.includes(getCurrentOriginalIndex()) && " (Đã hoàn thành)"}
               </p>
             </div>
 
