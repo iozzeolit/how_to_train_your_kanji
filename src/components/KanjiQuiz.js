@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 
 function KanjiQuiz({
   currentKanji,
@@ -16,6 +16,170 @@ function KanjiQuiz({
   romajiMode = {}, // Object with kun, on boolean flags for romaji mode
   onRomajiModeChange = () => {}, // Callback for romaji mode changes
 }) {
+  // Refs for input elements to handle focus navigation
+  const hanvietInputRef = useRef(null);
+  const kunInputRefs = useRef([]);
+  const onInputRefs = useRef([]);
+
+  // Function to handle Enter key press and move to next input
+  const handleKeyDown = (e, currentField, currentIndex = null) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      // Helper function to check if field has readings
+      const hasReading = (reading) => {
+        if (!reading) return false;
+        if (Array.isArray(reading)) {
+          return reading.length > 0 && reading.some((r) => r.trim() !== "");
+        }
+        return reading.trim() !== "";
+      };
+
+      // Helper function to focus next available input
+      const focusNextInput = () => {
+        if (currentField === "hanviet") {
+          // From hanviet, go to kun if available
+          if (
+            hasReading(currentKanji.kun) &&
+            !skipFields.kun &&
+            kunInputRefs.current[0]
+          ) {
+            kunInputRefs.current[0].focus();
+          } else if (
+            hasReading(currentKanji.on) &&
+            !skipFields.on &&
+            onInputRefs.current[0]
+          ) {
+            // Skip kun, go to on
+            onInputRefs.current[0].focus();
+          }
+        } else if (currentField === "kun") {
+          // From kun, go to next kun input or to on
+          const kunReadings = Array.isArray(currentKanji.kun)
+            ? currentKanji.kun.filter((r) => r.trim() !== "")
+            : [];
+
+          if (currentIndex !== null && currentIndex < kunReadings.length - 1) {
+            // Go to next kun input
+            const nextKunInput = kunInputRefs.current[currentIndex + 1];
+            if (nextKunInput) {
+              nextKunInput.focus();
+            }
+          } else {
+            // Go to on inputs
+            if (
+              hasReading(currentKanji.on) &&
+              !skipFields.on &&
+              onInputRefs.current[0]
+            ) {
+              onInputRefs.current[0].focus();
+            }
+          }
+        } else if (currentField === "on") {
+          // From on, go to next on input
+          const onReadings = Array.isArray(currentKanji.on)
+            ? currentKanji.on.filter((r) => r.trim() !== "")
+            : [];
+
+          if (currentIndex !== null && currentIndex < onReadings.length - 1) {
+            // Go to next on input
+            const nextOnInput = onInputRefs.current[currentIndex + 1];
+            if (nextOnInput) {
+              nextOnInput.focus();
+            }
+          }
+          // If this was the last on input, don't focus anywhere (end of form)
+        }
+      };
+
+      focusNextInput();
+    }
+  };
+
+  // Reset refs when kanji changes
+  useEffect(() => {
+    kunInputRefs.current = [];
+    onInputRefs.current = [];
+  }, [currentKanji]);
+
+  // Auto focus on first available input when question appears
+  useEffect(() => {
+    if (!showResult && currentKanji) {
+      // Use setTimeout to ensure refs are set after render
+      setTimeout(() => {
+        // Helper function to check if field has readings
+        const hasReading = (reading) => {
+          if (!reading) return false;
+          if (Array.isArray(reading)) {
+            return reading.length > 0 && reading.some((r) => r.trim() !== "");
+          }
+          return reading.trim() !== "";
+        };
+
+        // Focus on first available input (in order: hanviet -> kun -> on)
+        if (!skipFields.hanviet && hanvietInputRef.current) {
+          hanvietInputRef.current.focus();
+        } else if (
+          hasReading(currentKanji.kun) &&
+          !skipFields.kun &&
+          kunInputRefs.current[0]
+        ) {
+          kunInputRefs.current[0].focus();
+        } else if (
+          hasReading(currentKanji.on) &&
+          !skipFields.on &&
+          onInputRefs.current[0]
+        ) {
+          onInputRefs.current[0].focus();
+        }
+      }, 100); // Small delay to ensure refs are ready
+    }
+  }, [
+    currentKanji,
+    showResult,
+    skipFields.hanviet,
+    skipFields.kun,
+    skipFields.on,
+  ]);
+
+  // Helper function to focus on first available input
+  const focusFirstAvailableInput = () => {
+    setTimeout(() => {
+      // Helper function to check if field has readings
+      const hasReading = (reading) => {
+        if (!reading) return false;
+        if (Array.isArray(reading)) {
+          return reading.length > 0 && reading.some((r) => r.trim() !== "");
+        }
+        return reading.trim() !== "";
+      };
+
+      // Focus on first available input (in order: hanviet -> kun -> on)
+      if (!skipFields.hanviet && hanvietInputRef.current) {
+        hanvietInputRef.current.focus();
+      } else if (
+        hasReading(currentKanji?.kun) &&
+        !skipFields.kun &&
+        kunInputRefs.current[0]
+      ) {
+        kunInputRefs.current[0].focus();
+      } else if (
+        hasReading(currentKanji?.on) &&
+        !skipFields.on &&
+        onInputRefs.current[0]
+      ) {
+        onInputRefs.current[0].focus();
+      }
+    }, 50);
+  };
+
+  // Focus first available input when skip fields change
+  useEffect(() => {
+    if (!showResult && currentKanji) {
+      focusFirstAvailableInput();
+    }
+  }, [skipFields.hanviet, skipFields.kun, skipFields.on, showResult]);
+
   // Hàm chuyển đổi hiragana sang romaji
   const hiraganaToRomaji = (hiragana) => {
     const map = {
@@ -247,9 +411,11 @@ function KanjiQuiz({
             </label>
           </div>
           <input
+            ref={hanvietInputRef}
             type="text"
             value={userAnswers.hanviet}
             onChange={(e) => onInputChange("hanviet", e.target.value)}
+            onKeyDown={(e) => handleKeyDown(e, "hanviet")}
             style={{
               width: "100%",
               padding: "8px",
@@ -364,11 +530,15 @@ function KanjiQuiz({
                   .map((reading, index) => (
                     <input
                       key={index}
+                      ref={(el) => {
+                        if (el) kunInputRefs.current[index] = el;
+                      }}
                       type="text"
                       value={userAnswers.kun[index] || ""}
                       onChange={(e) =>
                         onInputChange("kun", e.target.value, index)
                       }
+                      onKeyDown={(e) => handleKeyDown(e, "kun", index)}
                       placeholder={`Âm kun thứ ${index + 1}${
                         romajiMode.kun ? " (Romaji)" : " (Hiragana)"
                       }`}
@@ -396,9 +566,13 @@ function KanjiQuiz({
             ) : (
               // Single input for single kun reading
               <input
+                ref={(el) => {
+                  if (el) kunInputRefs.current[0] = el;
+                }}
                 type="text"
                 value={userAnswers.kun[0] || ""}
                 onChange={(e) => onInputChange("kun", e.target.value, 0)}
+                onKeyDown={(e) => handleKeyDown(e, "kun", 0)}
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -522,11 +696,15 @@ function KanjiQuiz({
                   .map((reading, index) => (
                     <input
                       key={index}
+                      ref={(el) => {
+                        if (el) onInputRefs.current[index] = el;
+                      }}
                       type="text"
                       value={userAnswers.on[index] || ""}
                       onChange={(e) =>
                         onInputChange("on", e.target.value, index)
                       }
+                      onKeyDown={(e) => handleKeyDown(e, "on", index)}
                       placeholder={`Âm on thứ ${index + 1}${
                         romajiMode.on ? " (Romaji)" : " (Hiragana)"
                       }`}
@@ -554,9 +732,13 @@ function KanjiQuiz({
             ) : (
               // Single input for single on reading
               <input
+                ref={(el) => {
+                  if (el) onInputRefs.current[0] = el;
+                }}
                 type="text"
                 value={userAnswers.on[0] || ""}
                 onChange={(e) => onInputChange("on", e.target.value, 0)}
+                onKeyDown={(e) => handleKeyDown(e, "on", 0)}
                 style={{
                   width: "100%",
                   padding: "8px",
