@@ -182,15 +182,35 @@ function KanjiQuiz({
     }
   }, [skipFields.hanviet, skipFields.kun, skipFields.on, showResult]);
 
-  // Handle Ctrl key press to submit (check answers)
+  // Handle keyboard shortcuts: Ctrl (submit), , (previous), . (next)
   useEffect(() => {
     const handleKeyPress = (e) => {
-      // Only trigger if Ctrl is pressed and we're not showing result yet
+      // Don't trigger navigation keys if user is typing in an input field
+      const activeElement = document.activeElement;
+      const isTyping = activeElement && (
+        activeElement.tagName === 'INPUT' || 
+        activeElement.tagName === 'TEXTAREA'
+      );
+
+      // Handle Ctrl key to submit (check answers) - works even when typing
       if (e.key === "Control" && !showResult) {
-        // Prevent default behavior
         e.preventDefault();
-        // Trigger submit (allow even when focused in input)
         onSubmit(e);
+        return;
+      }
+
+      // Handle comma key (,) to go to previous kanji - works even when typing
+      if (e.key === "," && onPrevious) {
+        e.preventDefault();
+        onPrevious();
+        return;
+      }
+
+      // Handle period key (.) to go to next kanji - works even when typing
+      if (e.key === ".") {
+        e.preventDefault();
+        onNext();
+        return;
       }
     };
 
@@ -201,7 +221,7 @@ function KanjiQuiz({
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
     };
-  }, [showResult, onSubmit]);
+  }, [showResult, onSubmit, onPrevious, onNext]);
 
   // Hàm chuyển đổi hiragana sang romaji
   const hiraganaToRomaji = (hiragana) => {
@@ -875,7 +895,7 @@ function KanjiQuiz({
               color: "#6c757d",
             }}
           >
-            💡 Mẹo: Nhấn phím <strong>Ctrl</strong> để kiểm tra nhanh
+            💡 Phím tắt: <strong>Ctrl</strong> = Kiểm tra{onPrevious && ", "}<strong>,</strong> = Chữ trước{onPrevious && ""}, <strong>.</strong> = Chữ tiếp theo
           </div>
         )}
       </form>
