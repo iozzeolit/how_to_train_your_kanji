@@ -745,7 +745,7 @@ function DailyLearning({ kanjiData }) {
               }}
             ></div>
           </div>
-          
+
           {/* Checkbox Ẩn từ đã hoàn thành */}
           <div style={{ marginTop: "15px" }}>
             <label
