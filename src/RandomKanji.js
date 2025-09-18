@@ -22,14 +22,20 @@ function RandomKanji({ kanjiData }) {
     kun: [],
     on: [],
   });
-  const [skipFields, setSkipFields] = useState({
-    hanviet: false,
-    kun: false,
-    on: false,
+  const [skipFields, setSkipFields] = useState(() => {
+    const saved = localStorage.getItem('kanjiQuiz_skipFields');
+    return saved ? JSON.parse(saved) : {
+      hanviet: false,
+      kun: false,
+      on: false,
+    };
   });
-  const [romajiMode, setRomajiMode] = useState({
-    kun: false,
-    on: false,
+  const [romajiMode, setRomajiMode] = useState(() => {
+    const saved = localStorage.getItem('kanjiQuiz_romajiMode');
+    return saved ? JSON.parse(saved) : {
+      kun: false,
+      on: false,
+    };
   });
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState({
@@ -37,6 +43,15 @@ function RandomKanji({ kanjiData }) {
     kun: false,
     on: false,
   });
+
+  // Save skipFields and romajiMode to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('kanjiQuiz_skipFields', JSON.stringify(skipFields));
+  }, [skipFields]);
+
+  useEffect(() => {
+    localStorage.setItem('kanjiQuiz_romajiMode', JSON.stringify(romajiMode));
+  }, [romajiMode]);
 
   // Filter and prepare kanji data based on selected types
   const filterKanjiData = () => {
@@ -141,8 +156,7 @@ function RandomKanji({ kanjiData }) {
       kun: new Array(kunCount).fill(""),
       on: new Array(onCount).fill(""),
     });
-    setSkipFields({ hanviet: false, kun: false, on: false });
-    setRomajiMode({ kun: false, on: false });
+    // Keep skipFields and romajiMode unchanged to preserve user preferences
     setIsCorrect({ hanviet: false, kun: false, on: false });
   };
 
