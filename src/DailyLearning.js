@@ -447,6 +447,43 @@ function DailyLearning({ kanjiData }) {
     setIsCorrect({ hanviet: false, kun: false, on: false });
   };
 
+  // Chuyển đến ngày cụ thể
+  const goToDay = (dayNumber) => {
+    if (dayNumber >= 1 && dayNumber <= learningPlan.length) {
+      setCurrentDay(dayNumber);
+      setCurrentKanjiIndex(0);
+      setShowResult(false);
+      setShowStudyMode(false); // Default to quiz mode when switching days
+
+      // Reset user answers for the first kanji of the new day
+      const newDayKanji = learningPlan[dayNumber - 1]?.kanji || [];
+      if (newDayKanji.length > 0) {
+        const firstKanji = newDayKanji[0];
+        const kunCount = Array.isArray(firstKanji.kun)
+          ? firstKanji.kun.filter((r) => r.trim() !== "").length
+          : firstKanji.kun && firstKanji.kun.trim() !== ""
+          ? 1
+          : 0;
+        const onCount = Array.isArray(firstKanji.on)
+          ? firstKanji.on.filter((r) => r.trim() !== "").length
+          : firstKanji.on && firstKanji.on.trim() !== ""
+          ? 1
+          : 0;
+
+        setUserAnswers({
+          hanviet: "",
+          kun: new Array(kunCount).fill(""),
+          on: new Array(onCount).fill(""),
+        });
+      }
+
+      setIsCorrect({ hanviet: false, kun: false, on: false });
+
+      // Save to localStorage
+      localStorage.setItem("currentDay", dayNumber.toString());
+    }
+  };
+
   // Thay đổi input
   const handleInputChange = (field, value, index = null) => {
     setUserAnswers((prev) => {
@@ -886,6 +923,7 @@ function DailyLearning({ kanjiData }) {
               return (
                 <div
                   key={dayNumber}
+                  onClick={() => goToDay(dayNumber)}
                   style={{
                     width: "40px",
                     height: "40px",
@@ -905,7 +943,7 @@ function DailyLearning({ kanjiData }) {
                     border: isCurrent ? "3px solid #007bff" : "none",
                     transition: "all 0.2s ease",
                   }}
-                  title={`Ngày ${dayNumber}: ${dayProgress.length}/${day.kanji.length} từ`}
+                  title={`Ngày ${dayNumber}: ${dayProgress.length}/${day.kanji.length} từ - Click để chuyển đến ngày này`}
                 >
                   {dayNumber}
                 </div>
