@@ -40,6 +40,10 @@ function DailyLearning({ kanjiData }) {
   });
   const [isPlanSet, setIsPlanSet] = useState(false);
   const [showStudyMode, setShowStudyMode] = useState(false);
+  const [hideCompletedWords, setHideCompletedWords] = useState(() => {
+    const saved = localStorage.getItem('dailyLearning_hideCompleted');
+    return saved ? JSON.parse(saved) : false;
+  });
 
   // Save skipFields and romajiMode to localStorage when they change
   useEffect(() => {
@@ -49,6 +53,10 @@ function DailyLearning({ kanjiData }) {
   useEffect(() => {
     localStorage.setItem("kanjiQuiz_romajiMode", JSON.stringify(romajiMode));
   }, [romajiMode]);
+
+  useEffect(() => {
+    localStorage.setItem('dailyLearning_hideCompleted', JSON.stringify(hideCompletedWords));
+  }, [hideCompletedWords]);
 
   // Load dữ liệu từ localStorage
   useEffect(() => {
@@ -715,14 +723,44 @@ function DailyLearning({ kanjiData }) {
               overflowY: "auto",
             }}
           >
-            <h4
-              style={{ marginTop: 0, marginBottom: "15px", color: "#495057" }}
-            >
-              Chi tiết học tập - Ngày {currentDay} ({todayKanji.length} từ)
-            </h4>
+            <div style={{ 
+              display: "flex", 
+              justifyContent: "space-between", 
+              alignItems: "center", 
+              marginBottom: "15px" 
+            }}>
+              <h4 style={{ marginTop: 0, marginBottom: 0, color: "#495057" }}>
+                Chi tiết học tập - Ngày {currentDay} ({
+                  hideCompletedWords 
+                    ? todayKanji.filter((_, index) => !todayProgress.includes(index)).length
+                    : todayKanji.length
+                } / {todayKanji.length} từ)
+              </h4>
+              <label style={{ 
+                display: "flex", 
+                alignItems: "center", 
+                fontSize: "14px", 
+                cursor: "pointer",
+                color: "#6c757d"
+              }}>
+                <input
+                  type="checkbox"
+                  checked={hideCompletedWords}
+                  onChange={(e) => setHideCompletedWords(e.target.checked)}
+                  style={{ marginRight: "8px" }}
+                />
+                Ẩn từ đã hoàn thành
+              </label>
+            </div>
             <div style={{ display: "grid", gap: "15px" }}>
-              {todayKanji.map((kanji, index) => {
-                const isCompleted = todayProgress.includes(index);
+              {todayKanji
+                .map((kanji, index) => ({ kanji, index }))
+                .filter(({ index }) => {
+                  const isCompleted = todayProgress.includes(index);
+                  return hideCompletedWords ? !isCompleted : true;
+                })
+                .map(({ kanji, index }) => {
+                  const isCompleted = todayProgress.includes(index);
                 return (
                   <div
                     key={index}
