@@ -618,6 +618,35 @@ function DailyLearning({ kanjiData }) {
     }
   };
 
+  // Hoàn thành ngày hiện tại
+  const completeCurrentDay = () => {
+    const dayKey = `day${currentDay}`;
+    const todayKanji = learningPlan[currentDay - 1]?.kanji || [];
+    const newProgress = { ...dailyProgress };
+
+    // Đánh dấu tất cả từ trong ngày là hoàn thành
+    newProgress[dayKey] = todayKanji.map((_, index) => index);
+
+    setDailyProgress(newProgress);
+    localStorage.setItem("dailyProgress", JSON.stringify(newProgress));
+  };
+
+  // Reset ngày hiện tại
+  const resetCurrentDay = () => {
+    const dayKey = `day${currentDay}`;
+    const newProgress = { ...dailyProgress };
+
+    // Xóa tiến độ của ngày hiện tại
+    delete newProgress[dayKey];
+
+    setDailyProgress(newProgress);
+    localStorage.setItem("dailyProgress", JSON.stringify(newProgress));
+
+    // Reset về từ đầu tiên
+    setCurrentKanjiIndex(0);
+    setShowResult(false);
+  };
+
   // Thay đổi input
   const handleInputChange = (field, value, index = null) => {
     setUserAnswers((prev) => {
@@ -855,6 +884,40 @@ function DailyLearning({ kanjiData }) {
               />
               Ẩn từ đã hoàn thành
             </label>
+          </div>
+
+          {/* Nút hoàn thành và reset ngày */}
+          <div style={{ marginTop: "15px", display: "flex", gap: "10px" }}>
+            <button
+              onClick={completeCurrentDay}
+              style={{
+                padding: "8px 16px",
+                fontSize: "14px",
+                backgroundColor: "#28a745",
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+              }}
+              title="Đánh dấu tất cả từ trong ngày này là đã hoàn thành"
+            >
+              Hoàn thành ngày này
+            </button>
+            <button
+              onClick={resetCurrentDay}
+              style={{
+                padding: "8px 16px",
+                fontSize: "14px",
+                backgroundColor: "#ffc107",
+                color: "#212529",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+              }}
+              title="Xóa toàn bộ tiến độ của ngày này"
+            >
+              Reset ngày này
+            </button>
           </div>
         </div>
 
