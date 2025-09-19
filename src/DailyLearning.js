@@ -45,6 +45,7 @@ function DailyLearning({ kanjiData }) {
     return saved ? JSON.parse(saved) : false;
   });
   const [recentlyUpdatedDays, setRecentlyUpdatedDays] = useState(new Set());
+  const [pendingHideWords, setPendingHideWords] = useState(new Set()); // Từ đã hoàn thành nhưng chưa ẩn
 
   // Save skipFields and romajiMode to localStorage when they change
   useEffect(() => {
@@ -262,7 +263,12 @@ function DailyLearning({ kanjiData }) {
 
     return todayKanji
       .map((kanji, index) => ({ kanji, originalIndex: index }))
-      .filter(({ originalIndex }) => !todayProgress.includes(originalIndex));
+      .filter(({ originalIndex }) => {
+        const isCompleted = todayProgress.includes(originalIndex);
+        const isPendingHide = pendingHideWords.has(originalIndex);
+        // Ẩn nếu đã hoàn thành VÀ không trong danh sách pending
+        return !isCompleted || isPendingHide;
+      });
   };
 
   // Lấy original index của kanji hiện tại
@@ -487,6 +493,11 @@ function DailyLearning({ kanjiData }) {
       setDailyProgress(newProgress);
       localStorage.setItem("dailyProgress", JSON.stringify(newProgress));
 
+      // Nếu checkbox ẩn từ đã hoàn thành được tick, thêm vào pending thay vì ẩn ngay
+      if (hideCompletedWords) {
+        setPendingHideWords((prev) => new Set([...prev, originalIndex]));
+      }
+
       // Kiểm tra xem đã hoàn thành ngày chưa
       const todayKanji = learningPlan[currentDay - 1].kanji;
       if (newProgress[dayKey].length === todayKanji.length) {
@@ -502,6 +513,11 @@ function DailyLearning({ kanjiData }) {
 
   // Chuyển sang kanji tiếp theo
   const nextKanji = () => {
+    // Clear pending hide words khi chuyển từ
+    if (hideCompletedWords && pendingHideWords.size > 0) {
+      setPendingHideWords(new Set());
+    }
+
     const filteredKanji = getFilteredTodayKanji();
     if (filteredKanji.length === 0) return;
 
@@ -543,6 +559,11 @@ function DailyLearning({ kanjiData }) {
 
   // Quay lại kanji trước đó
   const handlePreviousKanji = () => {
+    // Clear pending hide words khi chuyển từ
+    if (hideCompletedWords && pendingHideWords.size > 0) {
+      setPendingHideWords(new Set());
+    }
+
     const filteredKanji = getFilteredTodayKanji();
     if (filteredKanji.length === 0) return;
 
@@ -584,6 +605,9 @@ function DailyLearning({ kanjiData }) {
   // Chuyển đến ngày cụ thể
   const goToDay = (dayNumber) => {
     if (dayNumber >= 1 && dayNumber <= learningPlan.length) {
+      // Clear pending hide words khi chuyển ngày
+      setPendingHideWords(new Set());
+
       setCurrentDay(dayNumber);
       setCurrentKanjiIndex(0);
       setShowResult(false);
@@ -645,6 +669,15 @@ function DailyLearning({ kanjiData }) {
     // Reset về từ đầu tiên
     setCurrentKanjiIndex(0);
     setShowResult(false);
+  };
+
+  // Helper function để xử lý chuyển mode
+  const handleModeChange = (isStudyMode) => {
+    // Clear pending hide words khi chuyển mode
+    if (hideCompletedWords && pendingHideWords.size > 0) {
+      setPendingHideWords(new Set());
+    }
+    setShowStudyMode(isStudyMode);
   };
 
   // Thay đổi input
@@ -815,7 +848,7 @@ function DailyLearning({ kanjiData }) {
             </h3>
             <div style={{ display: "flex", gap: "10px" }}>
               <button
-                onClick={() => setShowStudyMode(true)}
+                onClick={() => handleModeChange(true)}
                 style={{
                   padding: "8px 16px",
                   fontSize: "14px",
@@ -829,7 +862,7 @@ function DailyLearning({ kanjiData }) {
                 Học
               </button>
               <button
-                onClick={() => setShowStudyMode(false)}
+                onClick={() => handleModeChange(false)}
                 style={{
                   padding: "8px 16px",
                   fontSize: "14px",
