@@ -513,33 +513,89 @@ function DailyLearning({ kanjiData }) {
 
   // Chuyển sang kanji tiếp theo
   const nextKanji = () => {
+    const filteredKanji = getFilteredTodayKanji();
+    if (filteredKanji.length === 0) return;
+
+    // Kiểm tra xem từ hiện tại có trong pendingHideWords không
+    const currentOriginalIndex =
+      filteredKanji[currentKanjiIndex]?.originalIndex;
+    const shouldHideCurrentWord =
+      hideCompletedWords && pendingHideWords.has(currentOriginalIndex);
+
     // Clear pending hide words khi chuyển từ
     if (hideCompletedWords && pendingHideWords.size > 0) {
       setPendingHideWords(new Set());
     }
 
-    const filteredKanji = getFilteredTodayKanji();
-    if (filteredKanji.length === 0) return;
+    // Nếu từ hiện tại vừa bị ẩn, KHÔNG tăng index (chỉ xóa phần tử)
+    if (shouldHideCurrentWord) {
+      // Lấy danh sách mới sau khi clear pending
+      const newFilteredKanji = getFilteredTodayKanji();
 
-    if (currentKanjiIndex < filteredKanji.length - 1) {
+      // Điều chỉnh index nếu vượt quá giới hạn
+      if (
+        currentKanjiIndex >= newFilteredKanji.length &&
+        newFilteredKanji.length > 0
+      ) {
+        setCurrentKanjiIndex(newFilteredKanji.length - 1);
+      }
+
+      // Khởi tạo userAnswers cho từ mới tại vị trí hiện tại
+      const adjustedIndex = Math.min(
+        currentKanjiIndex,
+        newFilteredKanji.length - 1
+      );
+      const newKanji = newFilteredKanji[adjustedIndex]?.kanji;
+
+      if (newKanji) {
+        const kunCount = Array.isArray(newKanji.kun)
+          ? newKanji.kun.filter((r) => r.trim() !== "").length
+          : newKanji.kun && newKanji.kun.trim() !== ""
+          ? 1
+          : 0;
+        const onCount = Array.isArray(newKanji.on)
+          ? newKanji.on.filter((r) => r.trim() !== "").length
+          : newKanji.on && newKanji.on.trim() !== ""
+          ? 1
+          : 0;
+
+        setUserAnswers({
+          hanviet: "",
+          kun: new Array(kunCount).fill(""),
+          on: new Array(onCount).fill(""),
+        });
+      }
+
+      setShowResult(false);
+      setIsCorrect({ hanviet: false, kun: false, on: false });
+      return; // Dừng lại, không tăng index
+    }
+
+    // Logic bình thường: tăng index
+    const newFilteredKanji = getFilteredTodayKanji();
+    if (currentKanjiIndex < newFilteredKanji.length - 1) {
       setCurrentKanjiIndex(currentKanjiIndex + 1);
     } else {
       setCurrentKanjiIndex(0);
     }
 
-    // Khởi tạo userAnswers dựa trên kanji hiện tại
-    const nextIndex =
-      currentKanjiIndex < filteredKanji.length - 1 ? currentKanjiIndex + 1 : 0;
-    const currentKanji = filteredKanji[nextIndex]?.kanji;
-    if (currentKanji) {
-      const kunCount = Array.isArray(currentKanji.kun)
-        ? currentKanji.kun.filter((r) => r.trim() !== "").length
-        : currentKanji.kun && currentKanji.kun.trim() !== ""
+    // Khởi tạo userAnswers dựa trên kanji tại vị trí mới
+    const finalFilteredKanji = getFilteredTodayKanji();
+    const finalIndex =
+      currentKanjiIndex < finalFilteredKanji.length - 1
+        ? currentKanjiIndex + 1
+        : 0;
+    const nextKanji = finalFilteredKanji[finalIndex]?.kanji;
+
+    if (nextKanji) {
+      const kunCount = Array.isArray(nextKanji.kun)
+        ? nextKanji.kun.filter((r) => r.trim() !== "").length
+        : nextKanji.kun && nextKanji.kun.trim() !== ""
         ? 1
         : 0;
-      const onCount = Array.isArray(currentKanji.on)
-        ? currentKanji.on.filter((r) => r.trim() !== "").length
-        : currentKanji.on && currentKanji.on.trim() !== ""
+      const onCount = Array.isArray(nextKanji.on)
+        ? nextKanji.on.filter((r) => r.trim() !== "").length
+        : nextKanji.on && nextKanji.on.trim() !== ""
         ? 1
         : 0;
 
