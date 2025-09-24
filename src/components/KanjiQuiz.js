@@ -199,15 +199,15 @@ function KanjiQuiz({
         return;
       }
 
-      // Handle comma key (,) to go to previous kanji - works even when typing
-      if (e.key === "," && onPrevious) {
+      // Handle comma key (both , and 、) to go to previous kanji - ALWAYS works even when typing in input
+      if ((e.key === "," || e.key === "、") && onPrevious) {
         e.preventDefault();
         onPrevious();
         return;
       }
 
-      // Handle period key (.) to go to next kanji - works even when typing
-      if (e.key === ".") {
+      // Handle period key (both . and 。) to go to next kanji - ALWAYS works even when typing in input  
+      if (e.key === "." || e.key === "。") {
         e.preventDefault();
         onNext();
         return;
@@ -924,7 +924,7 @@ function KanjiQuiz({
             }}
           >
             💡 Phím tắt: <strong>Ctrl</strong> = Kiểm tra{onPrevious && ", "}
-            <strong>,</strong> = Chữ trước{onPrevious && ""}, <strong>.</strong>{" "}
+            <strong>, 、</strong> = Chữ trước{onPrevious && ""}, <strong>. 。</strong>{" "}
             = Chữ tiếp theo
           </div>
         )}
