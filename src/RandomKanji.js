@@ -48,6 +48,8 @@ function RandomKanji({ kanjiData }) {
     kun: false,
     on: false,
   });
+
+  // Marked words state
   const [markedWords, setMarkedWords] = useState(() => {
     const saved = localStorage.getItem("markedWords");
     return saved ? JSON.parse(saved) : [];
@@ -62,24 +64,10 @@ function RandomKanji({ kanjiData }) {
     localStorage.setItem("kanjiQuiz_romajiMode", JSON.stringify(romajiMode));
   }, [romajiMode]);
 
-  // Kiểm tra kanji hiện tại có được đánh dấu không
-  const isCurrentKanjiMarked = () => {
-    if (!currentKanji) return false;
-    return markedWords.includes(currentKanji.kanji);
-  };
-
-  // Toggle đánh dấu kanji hiện tại
-  const handleToggleMarkCurrentKanji = () => {
-    if (!currentKanji) return;
-    
-    setMarkedWords((prev) => {
-      const newMarkedWords = prev.includes(currentKanji.kanji)
-        ? prev.filter((k) => k !== currentKanji.kanji)
-        : [...prev, currentKanji.kanji];
-      localStorage.setItem("markedWords", JSON.stringify(newMarkedWords));
-      return newMarkedWords;
-    });
-  };
+  // Save markedWords to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem("markedWords", JSON.stringify(markedWords));
+  }, [markedWords]);
 
   // Filter and prepare kanji data based on selected types
   const filterKanjiData = () => {
@@ -495,6 +483,27 @@ function RandomKanji({ kanjiData }) {
     }
   };
 
+  // Mark/unmark functions
+  const handleToggleMark = () => {
+    if (!currentKanji) return;
+
+    const isCurrentlyMarked = markedWords.includes(currentKanji.kanji);
+
+    if (isCurrentlyMarked) {
+      // Remove from marked words
+      setMarkedWords((prev) =>
+        prev.filter((word) => word !== currentKanji.kanji)
+      );
+    } else {
+      // Add to marked words
+      setMarkedWords((prev) => [...prev, currentKanji.kanji]);
+    }
+  };
+
+  const isCurrentKanjiMarked = currentKanji
+    ? markedWords.includes(currentKanji.kanji)
+    : false;
+
   if (kanjiData.length === 0) {
     return (
       <div style={{ padding: "20px", textAlign: "center" }}>
@@ -756,8 +765,8 @@ function RandomKanji({ kanjiData }) {
         onSubmit={handleSubmit}
         onNext={getNextKanji}
         onPrevious={kanjiHistory.length > 1 ? handlePrevious : null}
-        isMarked={isCurrentKanjiMarked()}
-        onToggleMark={handleToggleMarkCurrentKanji}
+        isMarked={isCurrentKanjiMarked}
+        onToggleMark={handleToggleMark}
       />
 
       {showResult && currentKanji.example && (
