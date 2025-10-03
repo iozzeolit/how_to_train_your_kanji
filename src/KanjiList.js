@@ -9,6 +9,9 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
   const [searchKeyword, setSearchKeyword] = useState(""); // Từ khóa trong input
   const [activeSearchKeyword, setActiveSearchKeyword] = useState(""); // Từ khóa thực tế để tìm kiếm
   const [showMarkedOnly, setShowMarkedOnly] = useState(false);
+  const [showNewOnly, setShowNewOnly] = useState(false);
+  const [showUpdatedOnly, setShowUpdatedOnly] = useState(false);
+  const [showExistingOnly, setShowExistingOnly] = useState(false);
   const [markedWords, setMarkedWords] = useState(() => {
     const saved = localStorage.getItem("markedWords");
     return saved ? JSON.parse(saved) : [];
@@ -185,6 +188,17 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
       filtered = filtered.filter((item) => markedWords.includes(item.kanji));
     }
 
+    // Lọc theo status nếu có bật
+    if (showNewOnly) {
+      filtered = filtered.filter((item) => item.status === "new");
+    }
+    if (showUpdatedOnly) {
+      filtered = filtered.filter((item) => item.status === "updated");
+    }
+    if (showExistingOnly) {
+      filtered = filtered.filter((item) => !item.status || item.status === "existing");
+    }
+
     // Sau đó sắp xếp nếu có
     if (!sortBy) return filtered;
 
@@ -204,6 +218,9 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
     sortOrder,
     activeSearchKeyword,
     showMarkedOnly,
+    showNewOnly,
+    showUpdatedOnly,
+    showExistingOnly,
     markedWords,
   ]);
 
@@ -221,7 +238,7 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
   // Reset về trang 1 khi thay đổi sắp xếp hoặc tìm kiếm
   useMemo(() => {
     setCurrentPage(1);
-  }, [sortBy, sortOrder, activeSearchKeyword, showMarkedOnly]);
+  }, [sortBy, sortOrder, activeSearchKeyword, showMarkedOnly, showNewOnly, showUpdatedOnly, showExistingOnly]);
 
   // Hàm chuyển trang
   const goToPage = (page) => {
@@ -377,7 +394,21 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
               }}
             >
               <strong>📊 Thống kê:</strong>
-              <span style={{ color: "#28a745" }}>
+              <button
+                onClick={() => setShowNewOnly(!showNewOnly)}
+                style={{
+                  color: showNewOnly ? "white" : "#28a745",
+                  backgroundColor: showNewOnly ? "#28a745" : "transparent",
+                  border: showNewOnly ? "1px solid #28a745" : "1px solid #28a745",
+                  borderRadius: "4px",
+                  padding: "4px 8px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: showNewOnly ? "bold" : "normal",
+                  transition: "all 0.3s ease"
+                }}
+                title={showNewOnly ? "Hiển thị tất cả kanji" : "Chỉ hiển thị kanji mới"}
+              >
                 🆕 Mới:{" "}
                 {
                   filteredAndSortedKanjiData.filter((k) => k.status === "new")
@@ -385,8 +416,23 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
                 }
                 {activeSearchKeyword &&
                   ` / ${kanjiData.filter((k) => k.status === "new").length}`}
-              </span>
-              <span style={{ color: "#ffc107" }}>
+                {showNewOnly && " (đang lọc)"}
+              </button>
+              <button
+                onClick={() => setShowUpdatedOnly(!showUpdatedOnly)}
+                style={{
+                  color: showUpdatedOnly ? "#212529" : "#ffc107",
+                  backgroundColor: showUpdatedOnly ? "#ffc107" : "transparent",
+                  border: showUpdatedOnly ? "1px solid #ffc107" : "1px solid #ffc107",
+                  borderRadius: "4px",
+                  padding: "4px 8px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: showUpdatedOnly ? "bold" : "normal",
+                  transition: "all 0.3s ease"
+                }}
+                title={showUpdatedOnly ? "Hiển thị tất cả kanji" : "Chỉ hiển thị kanji cập nhật"}
+              >
                 🔄 Cập nhật:{" "}
                 {
                   filteredAndSortedKanjiData.filter(
@@ -397,8 +443,23 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
                   ` / ${
                     kanjiData.filter((k) => k.status === "updated").length
                   }`}
-              </span>
-              <span style={{ color: "#6c757d" }}>
+                {showUpdatedOnly && " (đang lọc)"}
+              </button>
+              <button
+                onClick={() => setShowExistingOnly(!showExistingOnly)}
+                style={{
+                  color: showExistingOnly ? "white" : "#6c757d",
+                  backgroundColor: showExistingOnly ? "#6c757d" : "transparent",
+                  border: showExistingOnly ? "1px solid #6c757d" : "1px solid #6c757d",
+                  borderRadius: "4px",
+                  padding: "4px 8px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: showExistingOnly ? "bold" : "normal",
+                  transition: "all 0.3s ease"
+                }}
+                title={showExistingOnly ? "Hiển thị tất cả kanji" : "Chỉ hiển thị kanji không đổi"}
+              >
                 ✅ Không đổi:{" "}
                 {
                   filteredAndSortedKanjiData.filter(
@@ -409,7 +470,8 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
                   ` / ${
                     kanjiData.filter((k) => k.status === "existing").length
                   }`}
-              </span>
+                {showExistingOnly && " (đang lọc)"}
+              </button>
               <span style={{ color: "#17a2b8" }}>
                 📝 {activeSearchKeyword ? "Hiển thị" : "Tổng"}:{" "}
                 {filteredAndSortedKanjiData.length}
