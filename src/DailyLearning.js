@@ -310,8 +310,6 @@ function DailyLearning({ kanjiData }) {
     const currentKanji = getCurrentKanji();
     if (!currentKanji) return;
 
-
-
     // Hàm kiểm tra đáp án với mảng readings - yêu cầu tất cả readings phải đúng
     const checkAllReadingsAnswer = (
       userAnswers,
@@ -421,16 +419,8 @@ function DailyLearning({ kanjiData }) {
         setPendingHideWords((prev) => new Set([...prev, originalIndex]));
       }
 
-      // Kiểm tra xem đã hoàn thành ngày chưa
-      const todayKanji = learningPlan[currentDay - 1].kanji;
-      if (newProgress[dayKey].length === todayKanji.length) {
-        // Chuyển sang ngày tiếp theo nếu có
-        if (currentDay < learningPlan.length) {
-          setCurrentDay(currentDay + 1);
-          setCurrentKanjiIndex(0);
-          localStorage.setItem("currentDay", (currentDay + 1).toString());
-        }
-      }
+      // Không tự động chuyển sang ngày tiếp theo khi hoàn thành ngày
+      // Để người dùng tự quyết định khi nhấn nút "Từ tiếp theo"
     }
   };
 
@@ -496,18 +486,63 @@ function DailyLearning({ kanjiData }) {
 
     // Logic bình thường: tăng index
     const newFilteredKanji = getFilteredTodayKanji();
-    if (currentKanjiIndex < newFilteredKanji.length - 1) {
-      setCurrentKanjiIndex(currentKanjiIndex + 1);
+    
+    // Kiểm tra xem đã đến từ cuối cùng trong ngày chưa
+    if (currentKanjiIndex >= newFilteredKanji.length - 1) {
+      // Kiểm tra xem đã hoàn thành tất cả từ trong ngày chưa
+      const todayKanji = learningPlan[currentDay - 1]?.kanji || [];
+      const todayProgress = dailyProgress[`day${currentDay}`] || [];
+      const isAllCompleted = todayProgress.length === todayKanji.length;
+      
+      // Nếu đã hoàn thành tất cả từ và có ngày tiếp theo, chuyển sang ngày tiếp theo
+      if (isAllCompleted && currentDay < learningPlan.length) {
+        setCurrentDay(currentDay + 1);
+        setCurrentKanjiIndex(0);
+        localStorage.setItem("currentDay", (currentDay + 1).toString());
+        
+        // Reset user answers cho ngày mới
+        const newDayKanji = learningPlan[currentDay]?.kanji || [];
+        if (newDayKanji.length > 0) {
+          const firstKanji = newDayKanji[0];
+          const kunCount = Array.isArray(firstKanji.kun)
+            ? firstKanji.kun.filter((r) => r.trim() !== "").length
+            : firstKanji.kun && firstKanji.kun.trim() !== ""
+            ? 1
+            : 0;
+          const onCount = Array.isArray(firstKanji.on)
+            ? firstKanji.on.filter((r) => r.trim() !== "").length
+            : firstKanji.on && firstKanji.on.trim() !== ""
+            ? 1
+            : 0;
+
+          setUserAnswers({
+            hanviet: "",
+            kun: new Array(kunCount).fill(""),
+            on: new Array(onCount).fill(""),
+          });
+        }
+        
+        setShowResult(false);
+        setIsCorrect({ hanviet: false, kun: false, on: false });
+        return;
+      } else {
+        // Nếu chưa hoàn thành hết hoặc đã hết ngày, quay về từ đầu tiên
+        setCurrentKanjiIndex(0);
+      }
     } else {
-      setCurrentKanjiIndex(0);
+      // Chuyển sang từ tiếp theo trong ngày
+      setCurrentKanjiIndex(currentKanjiIndex + 1);
     }
 
     // Khởi tạo userAnswers dựa trên kanji tại vị trí mới
     const finalFilteredKanji = getFilteredTodayKanji();
-    const finalIndex =
-      currentKanjiIndex < finalFilteredKanji.length - 1
-        ? currentKanjiIndex + 1
-        : 0;
+    let finalIndex;
+    if (currentKanjiIndex >= newFilteredKanji.length - 1) {
+      finalIndex = 0; // Quay về đầu
+    } else {
+      finalIndex = currentKanjiIndex + 1; // Từ tiếp theo
+    }
+    
     const nextKanji = finalFilteredKanji[finalIndex]?.kanji;
 
     if (nextKanji) {

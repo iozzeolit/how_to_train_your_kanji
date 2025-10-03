@@ -285,8 +285,6 @@ function RandomKanji({ kanjiData }) {
     return reading.trim() !== "";
   };
 
-
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!currentKanji) return;

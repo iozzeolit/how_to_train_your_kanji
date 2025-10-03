@@ -226,8 +226,6 @@ function KanjiQuiz({
     };
   }, [showResult, onSubmit, onPrevious, onNext]);
 
-
-
   // Hàm tạo biểu tượng trạng thái kanji
   const getStatusIcon = (status) => {
     switch (status) {
