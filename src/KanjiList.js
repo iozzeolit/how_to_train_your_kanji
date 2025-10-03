@@ -184,32 +184,33 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
     );
 
     // Lọc theo các điều kiện đã chọn (sử dụng logic OR - hiển thị thêm)
-    const hasAnyFilter = showMarkedOnly || showNewOnly || showUpdatedOnly || showExistingOnly;
-    
+    const hasAnyFilter =
+      showMarkedOnly || showNewOnly || showUpdatedOnly || showExistingOnly;
+
     if (hasAnyFilter) {
       filtered = filtered.filter((item) => {
         let shouldShow = false;
-        
+
         // Kiểm tra nếu kanji đã được đánh dấu
         if (showMarkedOnly && markedWords.includes(item.kanji)) {
           shouldShow = true;
         }
-        
+
         // Kiểm tra nếu kanji có status mới
         if (showNewOnly && item.status === "new") {
           shouldShow = true;
         }
-        
+
         // Kiểm tra nếu kanji có status cập nhật
         if (showUpdatedOnly && item.status === "updated") {
           shouldShow = true;
         }
-        
+
         // Kiểm tra nếu kanji có status existing
         if (showExistingOnly && (!item.status || item.status === "existing")) {
           shouldShow = true;
         }
-        
+
         return shouldShow;
       });
     }
@@ -462,7 +463,8 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
                     : "Chỉ hiển thị kanji cập nhật"
                 }
               >
-                🔄 Cập nhật: {kanjiData.filter((k) => k.status === "updated").length}
+                🔄 Cập nhật:{" "}
+                {kanjiData.filter((k) => k.status === "updated").length}
                 {showUpdatedOnly && " (đang lọc)"}
               </button>
               <button
@@ -486,7 +488,11 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
                     : "Chỉ hiển thị kanji không đổi"
                 }
               >
-                ✅ Không đổi: {kanjiData.filter((k) => !k.status || k.status === "existing").length}
+                ✅ Không đổi:{" "}
+                {
+                  kanjiData.filter((k) => !k.status || k.status === "existing")
+                    .length
+                }
                 {showExistingOnly && " (đang lọc)"}
               </button>
               <span style={{ color: "#17a2b8" }}>

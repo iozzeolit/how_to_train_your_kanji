@@ -11,6 +11,7 @@ function RandomKanji({ kanjiData }) {
     updated: true,
     new: true,
     learned: true,
+    marked: true,
   });
   const [filteredKanjiData, setFilteredKanjiData] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -77,6 +78,14 @@ function RandomKanji({ kanjiData }) {
       // Kiểm tra nếu kanji này thuộc loại "learned"
       const isLearned = learnedKanjiList.includes(kanji.kanji);
 
+      // Kiểm tra nếu kanji này thuộc loại "marked"
+      const isMarked = markedWords.includes(kanji.kanji);
+
+      // Nếu tick "marked" và kanji này đã được đánh dấu
+      if (kanjiTypes.marked && isMarked) {
+        return true;
+      }
+
       // Nếu tick "learned" và kanji này đã học
       if (kanjiTypes.learned && isLearned) {
         return true;
@@ -85,8 +94,8 @@ function RandomKanji({ kanjiData }) {
       // Kiểm tra các loại kanji thông thường (existing, updated, new)
       const status = kanji.status || "existing";
       if (kanjiTypes[status]) {
-        // Chỉ include nếu kanji này KHÔNG thuộc "learned" (tránh trùng lặp)
-        return !isLearned;
+        // Chỉ include nếu kanji này KHÔNG thuộc "learned" và "marked" (tránh trùng lặp)
+        return !isLearned && !isMarked;
       }
 
       return false;
@@ -521,6 +530,7 @@ function RandomKanji({ kanjiData }) {
       updated: kanjiData.filter((k) => k.status === "updated").length,
       new: kanjiData.filter((k) => k.status === "new").length,
       learned: getLearnedKanji().length,
+      marked: markedWords.length,
     };
 
     return (
@@ -637,7 +647,7 @@ function RandomKanji({ kanjiData }) {
                 onChange={() => handleKanjiTypeChange("new")}
                 style={{ marginRight: "10px" }}
               />
-              <span>🆕 Từ mới ({stats.new} từ)</span>
+              <span>🆕 Từ mới thêm vào ({stats.new} từ)</span>
             </label>
 
             {/* Divider */}
@@ -663,10 +673,24 @@ function RandomKanji({ kanjiData }) {
                 onChange={() => handleKanjiTypeChange("learned")}
                 style={{ marginRight: "10px" }}
               />
-              <span>
-                📚 Các từ đã học ({stats.learned} từ)-Nếu ko tick ô này thì đề
-                sẽ gồm các chữ chưa học
-              </span>
+              <span>📚 Các từ đã học ({stats.learned} từ)</span>
+            </label>
+
+            {/* Marked Kanji Filter */}
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={kanjiTypes.marked}
+                onChange={() => handleKanjiTypeChange("marked")}
+                style={{ marginRight: "10px" }}
+              />
+              <span>⭐ Các từ đã đánh dấu ({stats.marked} từ)</span>
             </label>
           </div>
 
