@@ -8,7 +8,6 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
     useState(false);
   const [searchKeyword, setSearchKeyword] = useState(""); // Từ khóa trong input
   const [activeSearchKeyword, setActiveSearchKeyword] = useState(""); // Từ khóa thực tế để tìm kiếm
-  const [showMarkedList, setShowMarkedList] = useState(false);
   const [showMarkedOnly, setShowMarkedOnly] = useState(false);
   const [markedWords, setMarkedWords] = useState(() => {
     const saved = localStorage.getItem("markedWords");
@@ -632,129 +631,6 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
               📝 Chỉ hiển thị 2 từ ví dụ đầu tiên (ẩn các ví dụ bổ sung)
             </label>
           </div>
-
-          {/* Quản lý từ đã đánh dấu */}
-          {markedWords.length > 0 && (
-            <div
-              style={{
-                marginBottom: "15px",
-                padding: "10px",
-                backgroundColor: "#fff3cd",
-                borderRadius: "5px",
-                border: "1px solid #ffeaa7",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  marginBottom: "10px",
-                }}
-              >
-                <strong style={{ color: "#856404" }}>
-                  ⭐ Các từ đã đánh dấu ({markedWords.length}):
-                </strong>
-                <button
-                  onClick={() => setShowMarkedList(!showMarkedList)}
-                  style={{
-                    padding: "4px 8px",
-                    backgroundColor: "#ffc107",
-                    color: "#212529",
-                    border: "none",
-                    borderRadius: "3px",
-                    cursor: "pointer",
-                    fontSize: "12px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {showMarkedList ? "Ẩn danh sách" : "Hiển thị danh sách"}
-                </button>
-                <button
-                  onClick={handleClearAllMarks}
-                  style={{
-                    padding: "4px 8px",
-                    backgroundColor: "#dc3545",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "3px",
-                    cursor: "pointer",
-                    fontSize: "12px",
-                  }}
-                >
-                  Xóa tất cả
-                </button>
-              </div>
-              {showMarkedList && (
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "8px",
-                    backgroundColor: "#fff",
-                    padding: "10px",
-                    borderRadius: "3px",
-                    border: "1px solid #dee2e6",
-                  }}
-                >
-                  {markedWords.map((kanji) => {
-                    const kanjiData = filteredAndSortedKanjiData.find(
-                      (k) => k.kanji === kanji
-                    );
-                    return (
-                      <div
-                        key={kanji}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          padding: "4px 8px",
-                          backgroundColor: "#f8f9fa",
-                          border: "1px solid #dee2e6",
-                          borderRadius: "3px",
-                          fontSize: "14px",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: "18px",
-                            fontWeight: "bold",
-                            marginRight: "6px",
-                          }}
-                        >
-                          {kanji}
-                        </span>
-                        {kanjiData && (
-                          <span style={{ fontSize: "12px", color: "#666" }}>
-                            (
-                            {Array.isArray(kanjiData.hanviet)
-                              ? kanjiData.hanviet.join(", ")
-                              : kanjiData.hanviet}
-                            )
-                          </span>
-                        )}
-                        <button
-                          onClick={() => handleToggleMark(kanji)}
-                          style={{
-                            marginLeft: "6px",
-                            padding: "2px 4px",
-                            backgroundColor: "#dc3545",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "2px",
-                            cursor: "pointer",
-                            fontSize: "10px",
-                          }}
-                          title="Xóa khỏi danh sách đánh dấu"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
         </>
       )}
 
