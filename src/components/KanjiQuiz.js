@@ -17,6 +17,8 @@ function KanjiQuiz({
   onSkipFieldChange = () => {}, // Callback for skip field changes
   romajiMode = {}, // Object with kun, on boolean flags for romaji mode
   onRomajiModeChange = () => {}, // Callback for romaji mode changes
+  isMarked = false, // Whether current kanji is marked
+  onToggleMark = null, // Callback for toggling mark status
 }) {
   // Refs for input elements to handle focus navigation
   const hanvietInputRef = useRef(null);
@@ -416,6 +418,20 @@ function KanjiQuiz({
             <span style={{ fontSize: "12px" }}>
               {getStatusIcon(currentKanji.status).text}
             </span>
+          </div>
+        )}
+        {/* Marked checkbox */}
+        {onToggleMark && (
+          <div style={{ position: "absolute", bottom: "10px", right: "10px", fontSize: "14px" }}>
+            <label style={{ cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center", backgroundColor: "rgba(255,255,255,0.9)", padding: "4px 8px", borderRadius: "4px" }}>
+              <input
+                type="checkbox"
+                checked={isMarked}
+                onChange={onToggleMark}
+                style={{ marginRight: "6px" }}
+              />
+              Đánh dấu từ này
+            </label>
           </div>
         )}
       </div>

@@ -46,6 +46,10 @@ function DailyLearning({ kanjiData }) {
   });
   const [recentlyUpdatedDays, setRecentlyUpdatedDays] = useState(new Set());
   const [pendingHideWords, setPendingHideWords] = useState(new Set()); // Từ đã hoàn thành nhưng chưa ẩn
+  const [markedWords, setMarkedWords] = useState(() => {
+    const saved = localStorage.getItem("markedWords");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   // Save skipFields and romajiMode to localStorage when they change
   useEffect(() => {
@@ -276,6 +280,27 @@ function DailyLearning({ kanjiData }) {
     const filteredKanji = getFilteredTodayKanji();
     const current = filteredKanji[currentKanjiIndex];
     return current ? current.originalIndex : currentKanjiIndex;
+  };
+
+  // Kiểm tra kanji hiện tại có được đánh dấu không
+  const isCurrentKanjiMarked = () => {
+    const currentKanji = getCurrentKanji();
+    if (!currentKanji) return false;
+    return markedWords.includes(currentKanji.kanji);
+  };
+
+  // Toggle đánh dấu kanji hiện tại
+  const handleToggleMarkCurrentKanji = () => {
+    const currentKanji = getCurrentKanji();
+    if (!currentKanji) return;
+    
+    setMarkedWords((prev) => {
+      const newMarkedWords = prev.includes(currentKanji.kanji)
+        ? prev.filter((k) => k !== currentKanji.kanji)
+        : [...prev, currentKanji.kanji];
+      localStorage.setItem("markedWords", JSON.stringify(newMarkedWords));
+      return newMarkedWords;
+    });
   };
 
   // Xử lý submit
@@ -1210,6 +1235,8 @@ function DailyLearning({ kanjiData }) {
               onPrevious={handlePreviousKanji}
               nextButtonText="Từ tiếp theo"
               additionalInfo={null}
+              isMarked={isCurrentKanjiMarked()}
+              onToggleMark={handleToggleMarkCurrentKanji}
             />
 
             {showResult && currentKanji.example && (
