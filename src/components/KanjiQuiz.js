@@ -206,7 +206,7 @@ function KanjiQuiz({
         return;
       }
 
-      // Handle period key (both . and 。) to go to next kanji - ALWAYS works even when typing in input  
+      // Handle period key (both . and 。) to go to next kanji - ALWAYS works even when typing in input
       if (e.key === "." || e.key === "。") {
         e.preventDefault();
         onNext();
@@ -924,8 +924,8 @@ function KanjiQuiz({
             }}
           >
             💡 Phím tắt: <strong>Ctrl</strong> = Kiểm tra{onPrevious && ", "}
-            <strong>, 、</strong> = Chữ trước{onPrevious && ""}, <strong>. 。</strong>{" "}
-            = Chữ tiếp theo
+            <strong>, 、</strong> = Chữ trước{onPrevious && ""},{" "}
+            <strong>. 。</strong> = Chữ tiếp theo
           </div>
         )}
       </form>
