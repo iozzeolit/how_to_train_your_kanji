@@ -9,6 +9,7 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
   const [searchKeyword, setSearchKeyword] = useState(""); // Từ khóa trong input
   const [activeSearchKeyword, setActiveSearchKeyword] = useState(""); // Từ khóa thực tế để tìm kiếm
   const [showMarkedList, setShowMarkedList] = useState(false);
+  const [showMarkedOnly, setShowMarkedOnly] = useState(false);
   const [markedWords, setMarkedWords] = useState(() => {
     const saved = localStorage.getItem("markedWords");
     return saved ? JSON.parse(saved) : [];
@@ -180,6 +181,11 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
       searchInAllFields(item, activeSearchKeyword)
     );
 
+    // Nếu bật chế độ chỉ hiển thị từ đã đánh dấu, lọc thêm
+    if (showMarkedOnly) {
+      filtered = filtered.filter((item) => markedWords.includes(item.kanji));
+    }
+
     // Sau đó sắp xếp nếu có
     if (!sortBy) return filtered;
 
@@ -193,7 +199,14 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
     });
 
     return sorted;
-  }, [kanjiData, sortBy, sortOrder, activeSearchKeyword]);
+  }, [
+    kanjiData,
+    sortBy,
+    sortOrder,
+    activeSearchKeyword,
+    showMarkedOnly,
+    markedWords,
+  ]);
 
   // Tính toán phân trang
   const totalPages = Math.ceil(
@@ -209,7 +222,7 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
   // Reset về trang 1 khi thay đổi sắp xếp hoặc tìm kiếm
   useMemo(() => {
     setCurrentPage(1);
-  }, [sortBy, sortOrder, activeSearchKeyword]);
+  }, [sortBy, sortOrder, activeSearchKeyword, showMarkedOnly]);
 
   // Hàm chuyển trang
   const goToPage = (page) => {
@@ -403,9 +416,30 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
                 {filteredAndSortedKanjiData.length}
                 {activeSearchKeyword && ` / ${kanjiData.length}`}
               </span>
-              <span style={{ color: "#e83e8c" }}>
+              <button
+                onClick={() => setShowMarkedOnly(!showMarkedOnly)}
+                style={{
+                  color: showMarkedOnly ? "white" : "#e83e8c",
+                  backgroundColor: showMarkedOnly ? "#e83e8c" : "transparent",
+                  border: showMarkedOnly
+                    ? "1px solid #e83e8c"
+                    : "1px solid #e83e8c",
+                  borderRadius: "4px",
+                  padding: "4px 8px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: showMarkedOnly ? "bold" : "normal",
+                  transition: "all 0.3s ease",
+                }}
+                title={
+                  showMarkedOnly
+                    ? "Hiển thị tất cả kanji"
+                    : "Chỉ hiển thị kanji đã đánh dấu"
+                }
+              >
                 ⭐ Đã đánh dấu: {markedWords.length}
-              </span>
+                {showMarkedOnly && " (đang lọc)"}
+              </button>
             </div>
           </div>
 
