@@ -77,7 +77,9 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
 
   // Hàm xóa tất cả đánh dấu
   const handleClearAllMarks = () => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa tất cả các từ đã đánh dấu?")) {
+    if (
+      window.confirm("Bạn có chắc chắn muốn xóa tất cả các từ đã đánh dấu?")
+    ) {
       setMarkedWords([]);
       localStorage.setItem("markedWords", JSON.stringify([]));
     }
@@ -608,8 +610,17 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
                 border: "1px solid #ffeaa7",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-                <strong style={{ color: "#856404" }}>⭐ Các từ đã đánh dấu ({markedWords.length}):</strong>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  marginBottom: "10px",
+                }}
+              >
+                <strong style={{ color: "#856404" }}>
+                  ⭐ Các từ đã đánh dấu ({markedWords.length}):
+                </strong>
                 <button
                   onClick={() => setShowMarkedList(!showMarkedList)}
                   style={{
@@ -653,7 +664,9 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
                   }}
                 >
                   {markedWords.map((kanji) => {
-                    const kanjiData = filteredAndSortedKanjiData.find((k) => k.kanji === kanji);
+                    const kanjiData = filteredAndSortedKanjiData.find(
+                      (k) => k.kanji === kanji
+                    );
                     return (
                       <div
                         key={kanji}
@@ -667,10 +680,22 @@ function KanjiList({ kanjiData, onDeleteKanji }) {
                           fontSize: "14px",
                         }}
                       >
-                        <span style={{ fontSize: "18px", fontWeight: "bold", marginRight: "6px" }}>{kanji}</span>
+                        <span
+                          style={{
+                            fontSize: "18px",
+                            fontWeight: "bold",
+                            marginRight: "6px",
+                          }}
+                        >
+                          {kanji}
+                        </span>
                         {kanjiData && (
                           <span style={{ fontSize: "12px", color: "#666" }}>
-                            ({Array.isArray(kanjiData.hanviet) ? kanjiData.hanviet.join(", ") : kanjiData.hanviet})
+                            (
+                            {Array.isArray(kanjiData.hanviet)
+                              ? kanjiData.hanviet.join(", ")
+                              : kanjiData.hanviet}
+                            )
                           </span>
                         )}
                         <button

@@ -422,8 +422,25 @@ function KanjiQuiz({
         )}
         {/* Marked checkbox */}
         {onToggleMark && (
-          <div style={{ position: "absolute", bottom: "10px", right: "10px", fontSize: "14px" }}>
-            <label style={{ cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center", backgroundColor: "rgba(255,255,255,0.9)", padding: "4px 8px", borderRadius: "4px" }}>
+          <div
+            style={{
+              position: "absolute",
+              bottom: "10px",
+              right: "10px",
+              fontSize: "14px",
+            }}
+          >
+            <label
+              style={{
+                cursor: "pointer",
+                userSelect: "none",
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "rgba(255,255,255,0.9)",
+                padding: "4px 8px",
+                borderRadius: "4px",
+              }}
+            >
               <input
                 type="checkbox"
                 checked={isMarked}

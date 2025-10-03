@@ -48,6 +48,10 @@ function RandomKanji({ kanjiData }) {
     kun: false,
     on: false,
   });
+  const [markedWords, setMarkedWords] = useState(() => {
+    const saved = localStorage.getItem("markedWords");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   // Save skipFields and romajiMode to localStorage when they change
   useEffect(() => {
@@ -57,6 +61,25 @@ function RandomKanji({ kanjiData }) {
   useEffect(() => {
     localStorage.setItem("kanjiQuiz_romajiMode", JSON.stringify(romajiMode));
   }, [romajiMode]);
+
+  // Kiểm tra kanji hiện tại có được đánh dấu không
+  const isCurrentKanjiMarked = () => {
+    if (!currentKanji) return false;
+    return markedWords.includes(currentKanji.kanji);
+  };
+
+  // Toggle đánh dấu kanji hiện tại
+  const handleToggleMarkCurrentKanji = () => {
+    if (!currentKanji) return;
+    
+    setMarkedWords((prev) => {
+      const newMarkedWords = prev.includes(currentKanji.kanji)
+        ? prev.filter((k) => k !== currentKanji.kanji)
+        : [...prev, currentKanji.kanji];
+      localStorage.setItem("markedWords", JSON.stringify(newMarkedWords));
+      return newMarkedWords;
+    });
+  };
 
   // Filter and prepare kanji data based on selected types
   const filterKanjiData = () => {
@@ -733,6 +756,8 @@ function RandomKanji({ kanjiData }) {
         onSubmit={handleSubmit}
         onNext={getNextKanji}
         onPrevious={kanjiHistory.length > 1 ? handlePrevious : null}
+        isMarked={isCurrentKanjiMarked()}
+        onToggleMark={handleToggleMarkCurrentKanji}
       />
 
       {showResult && currentKanji.example && (

@@ -293,7 +293,7 @@ function DailyLearning({ kanjiData }) {
   const handleToggleMarkCurrentKanji = () => {
     const currentKanji = getCurrentKanji();
     if (!currentKanji) return;
-    
+
     setMarkedWords((prev) => {
       const newMarkedWords = prev.includes(currentKanji.kanji)
         ? prev.filter((k) => k !== currentKanji.kanji)
