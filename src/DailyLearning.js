@@ -486,20 +486,20 @@ function DailyLearning({ kanjiData }) {
 
     // Logic bình thường: tăng index
     const newFilteredKanji = getFilteredTodayKanji();
-    
+
     // Kiểm tra xem đã đến từ cuối cùng trong ngày chưa
     if (currentKanjiIndex >= newFilteredKanji.length - 1) {
       // Kiểm tra xem đã hoàn thành tất cả từ trong ngày chưa
       const todayKanji = learningPlan[currentDay - 1]?.kanji || [];
       const todayProgress = dailyProgress[`day${currentDay}`] || [];
       const isAllCompleted = todayProgress.length === todayKanji.length;
-      
+
       // Nếu đã hoàn thành tất cả từ và có ngày tiếp theo, chuyển sang ngày tiếp theo
       if (isAllCompleted && currentDay < learningPlan.length) {
         setCurrentDay(currentDay + 1);
         setCurrentKanjiIndex(0);
         localStorage.setItem("currentDay", (currentDay + 1).toString());
-        
+
         // Reset user answers cho ngày mới
         const newDayKanji = learningPlan[currentDay]?.kanji || [];
         if (newDayKanji.length > 0) {
@@ -521,7 +521,7 @@ function DailyLearning({ kanjiData }) {
             on: new Array(onCount).fill(""),
           });
         }
-        
+
         setShowResult(false);
         setIsCorrect({ hanviet: false, kun: false, on: false });
         return;
@@ -542,7 +542,7 @@ function DailyLearning({ kanjiData }) {
     } else {
       finalIndex = currentKanjiIndex + 1; // Từ tiếp theo
     }
-    
+
     const nextKanji = finalFilteredKanji[finalIndex]?.kanji;
 
     if (nextKanji) {
