@@ -466,6 +466,47 @@ function DailyLearning({ kanjiData }) {
         setPendingHideWords(new Set());
       }
 
+      // Lấy danh sách kanji sau khi clear pending (tính toán thủ công)
+      const todayKanji = learningPlan[currentDay - 1].kanji;
+      const todayProgress = dailyProgress[`day${currentDay}`] || [];
+      let resetFilteredKanji;
+      
+      if (!hideCompletedWords) {
+        resetFilteredKanji = todayKanji.map((kanji, index) => ({
+          kanji,
+          originalIndex: index,
+        }));
+      } else {
+        resetFilteredKanji = todayKanji
+          .map((kanji, index) => ({ kanji, originalIndex: index }))
+          .filter(({ originalIndex }) => {
+            const isCompleted = todayProgress.includes(originalIndex);
+            // Không có pending nữa vì đã clear ở trên
+            return !isCompleted;
+          });
+      }
+
+      // Reset userAnswers cho từ đầu tiên
+      const firstKanji = resetFilteredKanji[0]?.kanji;
+      if (firstKanji) {
+        const kunCount = Array.isArray(firstKanji.kun)
+          ? firstKanji.kun.filter((r) => r.trim() !== "").length
+          : firstKanji.kun && firstKanji.kun.trim() !== ""
+          ? 1
+          : 0;
+        const onCount = Array.isArray(firstKanji.on)
+          ? firstKanji.on.filter((r) => r.trim() !== "").length
+          : firstKanji.on && firstKanji.on.trim() !== ""
+          ? 1
+          : 0;
+
+        setUserAnswers({
+          hanviet: "",
+          kun: new Array(kunCount).fill(""),
+          on: new Array(onCount).fill(""),
+        });
+      }
+
       setShowResult(false);
       setIsCorrect({ hanviet: false, kun: false, on: false });
       return;
@@ -484,15 +525,46 @@ function DailyLearning({ kanjiData }) {
 
     // Nếu từ hiện tại vừa bị ẩn, KHÔNG tăng index (chỉ xóa phần tử)
     if (shouldHideCurrentWord) {
-      // Lấy danh sách mới sau khi clear pending
-      const newFilteredKanji = getFilteredTodayKanji();
+      // Tính toán danh sách mới sau khi clear pending thủ công
+      const todayKanji = learningPlan[currentDay - 1].kanji;
+      const todayProgress = dailyProgress[`day${currentDay}`] || [];
+      const newFilteredKanji = todayKanji
+        .map((kanji, index) => ({ kanji, originalIndex: index }))
+        .filter(({ originalIndex }) => {
+          const isCompleted = todayProgress.includes(originalIndex);
+          // Không có pending nữa vì đã clear ở trên
+          return !isCompleted;
+        });
 
       // Điều chỉnh index nếu vượt quá giới hạn
+      let targetIndex = currentKanjiIndex;
       if (
         currentKanjiIndex >= newFilteredKanji.length &&
         newFilteredKanji.length > 0
       ) {
-        setCurrentKanjiIndex(newFilteredKanji.length - 1);
+        targetIndex = newFilteredKanji.length - 1;
+        setCurrentKanjiIndex(targetIndex);
+      }
+
+      // Reset userAnswers cho từ tiếp theo
+      const nextKanji = newFilteredKanji[targetIndex]?.kanji;
+      if (nextKanji) {
+        const kunCount = Array.isArray(nextKanji.kun)
+          ? nextKanji.kun.filter((r) => r.trim() !== "").length
+          : nextKanji.kun && nextKanji.kun.trim() !== ""
+          ? 1
+          : 0;
+        const onCount = Array.isArray(nextKanji.on)
+          ? nextKanji.on.filter((r) => r.trim() !== "").length
+          : nextKanji.on && nextKanji.on.trim() !== ""
+          ? 1
+          : 0;
+
+        setUserAnswers({
+          hanviet: "",
+          kun: new Array(kunCount).fill(""),
+          on: new Array(onCount).fill(""),
+        });
       }
 
       setShowResult(false);
@@ -501,9 +573,31 @@ function DailyLearning({ kanjiData }) {
     }
 
     // Logic bình thường: chuyển sang từ tiếp theo trong ngày
-    setCurrentKanjiIndex(currentKanjiIndex + 1);
+    const nextIndex = currentKanjiIndex + 1;
+    setCurrentKanjiIndex(nextIndex);
+    
+    // Reset userAnswers cho từ tiếp theo
+    const nextKanji = filteredKanji[nextIndex]?.kanji;
+    if (nextKanji) {
+      const kunCount = Array.isArray(nextKanji.kun)
+        ? nextKanji.kun.filter((r) => r.trim() !== "").length
+        : nextKanji.kun && nextKanji.kun.trim() !== ""
+        ? 1
+        : 0;
+      const onCount = Array.isArray(nextKanji.on)
+        ? nextKanji.on.filter((r) => r.trim() !== "").length
+        : nextKanji.on && nextKanji.on.trim() !== ""
+        ? 1
+        : 0;
 
-    // Reset UI state - useEffect sẽ tự động khởi tạo userAnswers
+      setUserAnswers({
+        hanviet: "",
+        kun: new Array(kunCount).fill(""),
+        on: new Array(onCount).fill(""),
+      });
+    }
+
+    // Reset UI state
     setShowResult(false);
     setIsCorrect({ hanviet: false, kun: false, on: false });
   };
