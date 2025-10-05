@@ -460,19 +460,20 @@ function DailyLearning({ kanjiData }) {
         // Còn từ chưa hoàn thành, quay về từ đầu tiên (sẽ hiện lại từ sai)
         setCurrentKanjiIndex(0);
       }
-      
+
       // Clear pending hide words khi reset về đầu
       if (hideCompletedWords && pendingHideWords.size > 0) {
         setPendingHideWords(new Set());
       }
-      
+
       setShowResult(false);
       setIsCorrect({ hanviet: false, kun: false, on: false });
       return;
     }
 
     // Kiểm tra xem từ hiện tại có trong pendingHideWords không
-    const currentOriginalIndex = filteredKanji[currentKanjiIndex]?.originalIndex;
+    const currentOriginalIndex =
+      filteredKanji[currentKanjiIndex]?.originalIndex;
     const shouldHideCurrentWord =
       hideCompletedWords && pendingHideWords.has(currentOriginalIndex);
 
