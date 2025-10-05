@@ -429,9 +429,50 @@ function DailyLearning({ kanjiData }) {
     const filteredKanji = getFilteredTodayKanji();
     if (filteredKanji.length === 0) return;
 
+    // TRƯỚC TIÊN: Luôn kiểm tra xem đã hoàn thành tất cả từ trong ngày chưa (bất kể checkbox)
+    const todayKanji = learningPlan[currentDay - 1]?.kanji || [];
+    const todayProgress = dailyProgress[`day${currentDay}`] || [];
+    const isAllCompleted = todayProgress.length === todayKanji.length;
+
+    // Kiểm tra xem đã đến từ cuối cùng trong danh sách filtered chưa
+    if (currentKanjiIndex >= filteredKanji.length - 1) {
+      if (isAllCompleted) {
+        // Tất cả từ đã hoàn thành, chuyển sang ngày tiếp theo nếu có
+        if (currentDay < learningPlan.length) {
+          const nextDay = currentDay + 1;
+          setCurrentDay(nextDay);
+          setCurrentKanjiIndex(0);
+          localStorage.setItem("currentDay", nextDay.toString());
+
+          // Clear pending hide words khi chuyển ngày
+          if (hideCompletedWords && pendingHideWords.size > 0) {
+            setPendingHideWords(new Set());
+          }
+
+          setShowResult(false);
+          setIsCorrect({ hanviet: false, kun: false, on: false });
+          return;
+        } else {
+          // Đã hết ngày, quay về từ đầu tiên
+          setCurrentKanjiIndex(0);
+        }
+      } else {
+        // Còn từ chưa hoàn thành, quay về từ đầu tiên (sẽ hiện lại từ sai)
+        setCurrentKanjiIndex(0);
+      }
+      
+      // Clear pending hide words khi reset về đầu
+      if (hideCompletedWords && pendingHideWords.size > 0) {
+        setPendingHideWords(new Set());
+      }
+      
+      setShowResult(false);
+      setIsCorrect({ hanviet: false, kun: false, on: false });
+      return;
+    }
+
     // Kiểm tra xem từ hiện tại có trong pendingHideWords không
-    const currentOriginalIndex =
-      filteredKanji[currentKanjiIndex]?.originalIndex;
+    const currentOriginalIndex = filteredKanji[currentKanjiIndex]?.originalIndex;
     const shouldHideCurrentWord =
       hideCompletedWords && pendingHideWords.has(currentOriginalIndex);
 
@@ -453,72 +494,13 @@ function DailyLearning({ kanjiData }) {
         setCurrentKanjiIndex(newFilteredKanji.length - 1);
       }
 
-      // Khởi tạo userAnswers cho từ mới tại vị trí hiện tại
-      const adjustedIndex = Math.min(
-        currentKanjiIndex,
-        newFilteredKanji.length - 1
-      );
-      const newKanji = newFilteredKanji[adjustedIndex]?.kanji;
-
-      if (newKanji) {
-        const kunCount = Array.isArray(newKanji.kun)
-          ? newKanji.kun.filter((r) => r.trim() !== "").length
-          : newKanji.kun && newKanji.kun.trim() !== ""
-          ? 1
-          : 0;
-        const onCount = Array.isArray(newKanji.on)
-          ? newKanji.on.filter((r) => r.trim() !== "").length
-          : newKanji.on && newKanji.on.trim() !== ""
-          ? 1
-          : 0;
-
-        setUserAnswers({
-          hanviet: "",
-          kun: new Array(kunCount).fill(""),
-          on: new Array(onCount).fill(""),
-        });
-      }
-      console.log("4");
       setShowResult(false);
       setIsCorrect({ hanviet: false, kun: false, on: false });
       return; // Dừng lại, không tăng index
     }
-    console.log("5");
-    // Logic bình thường: tăng index
-    const newFilteredKanji = getFilteredTodayKanji();
 
-    // Luôn kiểm tra xem đã hoàn thành tất cả từ trong ngày chưa (bất kể checkbox)
-    const todayKanji = learningPlan[currentDay - 1]?.kanji || [];
-    const todayProgress = dailyProgress[`day${currentDay}`] || [];
-    const isAllCompleted = todayProgress.length === todayKanji.length;
-    console.log("6");
-    // Kiểm tra xem đã đến từ cuối cùng trong danh sách filtered chưa
-    if (currentKanjiIndex >= newFilteredKanji.length - 1) {
-      console.log("last word");
-      if (isAllCompleted) {
-        // Tất cả từ đã hoàn thành, chuyển sang ngày tiếp theo nếu có
-        if (currentDay < learningPlan.length) {
-          console.log("next day");
-          const nextDay = currentDay + 1;
-          setCurrentDay(nextDay);
-          setCurrentKanjiIndex(0);
-          localStorage.setItem("currentDay", nextDay.toString());
-
-          setShowResult(false);
-          setIsCorrect({ hanviet: false, kun: false, on: false });
-          return;
-        } else {
-          // Đã hết ngày, quay về từ đầu tiên
-          setCurrentKanjiIndex(0);
-        }
-      } else {
-        // Còn từ chưa hoàn thành, quay về từ đầu tiên (sẽ hiện lại từ sai)
-        setCurrentKanjiIndex(0);
-      }
-    } else {
-      // Chuyển sang từ tiếp theo trong ngày
-      setCurrentKanjiIndex(currentKanjiIndex + 1);
-    }
+    // Logic bình thường: chuyển sang từ tiếp theo trong ngày
+    setCurrentKanjiIndex(currentKanjiIndex + 1);
 
     // Reset UI state - useEffect sẽ tự động khởi tạo userAnswers
     setShowResult(false);
